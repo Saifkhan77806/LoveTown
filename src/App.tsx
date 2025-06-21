@@ -13,16 +13,13 @@ import ForgotPasswordForm from './components/Auth/ForgotPasswordForm';
 import { OnboardingData, Conversation } from './types';
 import { Route, Routes } from 'react-router-dom';
 import TestChat from './components/Chat/TestChatBox';
-import { useUser } from '@clerk/clerk-react';
-
 
 function App() {
   const { appState, updateUserState, unpinMatch, startConversation } = useAppState();
-  const { isSignedIn} = useUser()
   const [currentView, setCurrentView] = useState('dashboard');
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(isSignedIn);
   
+
   const handleOnboardingComplete = (data: OnboardingData) => {
     console.log('Onboarding completed with data:', data);
     setShowOnboarding(false);
@@ -51,16 +48,8 @@ function App() {
   };
 
 
-  const handleSignOut = () => {
-    setIsAuthenticated(false);
-    setCurrentView('dashboard');
-  };
-
+ 
   // Show authentication forms if not authenticated
-
-  if(isAuthenticated){
-    return <LoginForm />
-  }
 
   if (showOnboarding) {
     return <Onboarding onComplete={handleOnboardingComplete} />;
@@ -78,7 +67,6 @@ function App() {
           onClose={() => { }}
           currentView={currentView}
           userState={appState.userState}
-          onSignOut={handleSignOut}
         />
       </div>
 
@@ -171,7 +159,6 @@ function App() {
                   <p className="text-sm text-gray-600 mt-1">Get help and contact support</p>
                 </button>
                 <button
-                  onClick={handleSignOut}
                   className="w-full p-4 bg-red-50 border border-red-200 rounded-xl text-left hover:bg-red-100 transition-all duration-200"
                 >
                   <h3 className="font-medium text-red-900">Sign Out</h3>
