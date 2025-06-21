@@ -6,7 +6,7 @@ import { useSignUp } from '@clerk/clerk-react';
 
 
 const RegisterForm = () => {
-  const {signUp, isLoaded, setActive} = useSignUp();
+  const { signUp, setActive } = useSignUp();
   const [otp, setOtp] = useState("");
   const [formData, setFormData] = useState({
     name: '',
@@ -67,49 +67,49 @@ const RegisterForm = () => {
     setIsLoading(true);
 
     // Simulate API call
-    try{
+    try {
 
-     await signUp?.create({
+      await signUp?.create({
         username: formData.name,
         emailAddress: formData.email,
         password: formData.password
       })
 
-     await signUp?.prepareEmailAddressVerification({strategy: "email_code"})
-     setPendingVerification(true)
+      await signUp?.prepareEmailAddressVerification({ strategy: "email_code" })
+      setPendingVerification(true)
 
-       setTimeout(() => {
-      setIsLoading(false);
-      console.log(formData)
-      // navigate("/")
-    }, 2000);
+      setTimeout(() => {
+        setIsLoading(false);
+        console.log(formData)
+      }, 2000);
 
-    }catch(error){
+    } catch (error) {
       alert("some thing went worng")
       console.log(error);
       setIsLoading(false)
     }
 
-    
 
 
 
-   
+
+
   };
 
-  const handleVerification = async () =>{
-    if(!signUp || !setActive) return;
+  const handleVerification = async () => {
+    if (!signUp || !setActive) return;
 
-    try{
-      const result = await signUp.attemptEmailAddressVerification({code: otp})
+    try {
+      const result = await signUp.attemptEmailAddressVerification({ code: otp })
       console.log(result)
 
-      if((await result).status == "complete"){
-        await setActive({session: (await result).createdSessionId})
+      if ((await result).status == "complete") {
+        await setActive({ session: (await result).createdSessionId })
+        navigate("/")
       }
-      
-      
-    }catch(error){
+
+
+    } catch (error) {
       alert("Something went wrong during verification");
       console.log("verfication error", error)
     }
@@ -178,8 +178,8 @@ const RegisterForm = () => {
                   value={formData.name}
                   onChange={(e) => handleChange('name', e.target.value)}
                   className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${errors.name
-                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                      : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
+                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                    : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
                     }`}
                   placeholder="Your full name"
                 />
@@ -203,8 +203,8 @@ const RegisterForm = () => {
                   value={formData.email}
                   onChange={(e) => handleChange('email', e.target.value)}
                   className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${errors.email
-                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                      : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
+                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                    : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
                     }`}
                   placeholder="your@email.com"
                 />
@@ -228,8 +228,8 @@ const RegisterForm = () => {
                   value={formData.password}
                   onChange={(e) => handleChange('password', e.target.value)}
                   className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${errors.password
-                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                      : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
+                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                    : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
                     }`}
                   placeholder="Create a strong password"
                 />
@@ -276,8 +276,8 @@ const RegisterForm = () => {
                   value={formData.confirmPassword}
                   onChange={(e) => handleChange('confirmPassword', e.target.value)}
                   className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${errors.confirmPassword
-                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                      : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
+                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+                    : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
                     }`}
                   placeholder="Confirm your password"
                 />
@@ -310,8 +310,8 @@ const RegisterForm = () => {
                     className="sr-only"
                   />
                   <div className={`w-5 h-5 border-2 rounded transition-all duration-200 ${agreedToTerms
-                      ? 'bg-primary-600 border-primary-600'
-                      : 'border-gray-300 hover:border-primary-400'
+                    ? 'bg-primary-600 border-primary-600'
+                    : 'border-gray-300 hover:border-primary-400'
                     }`}>
                     {agreedToTerms && (
                       <Check className="w-3 h-3 text-white m-0.5" strokeWidth={3} />
@@ -339,8 +339,8 @@ const RegisterForm = () => {
               type="submit"
               disabled={isLoading}
               className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 ${isLoading
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-primary-600 hover:bg-primary-700 shadow-lg hover:shadow-xl'
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-primary-600 hover:bg-primary-700 shadow-lg hover:shadow-xl'
                 }`}
             >
               {isLoading ? (
@@ -354,16 +354,21 @@ const RegisterForm = () => {
             </button>
           </form>
 
-          <div>
-            <input
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200`}
-                  placeholder="Confirm your password"
-                />
-                <button onClick={handleVerification}>Confirm verification</button>
-          </div>
+          {/* verfication of email */}
+
+          {
+            pendingVerification &&
+            <div>
+              <input
+                type="text"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200`}
+                placeholder="Confirm your password"
+              />
+              <button onClick={handleVerification}>Confirm verification</button>
+            </div>
+          }
 
           {/* Switch to Login */}
           <div className="mt-6 text-center">

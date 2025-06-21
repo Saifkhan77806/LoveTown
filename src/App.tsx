@@ -13,41 +13,16 @@ import ForgotPasswordForm from './components/Auth/ForgotPasswordForm';
 import { OnboardingData, Conversation } from './types';
 import { Route, Routes } from 'react-router-dom';
 import TestChat from './components/Chat/TestChatBox';
+import { useUser } from '@clerk/clerk-react';
 
-type AuthView = 'login' | 'register' | 'forgot-password';
 
 function App() {
   const { appState, updateUserState, unpinMatch, startConversation } = useAppState();
+  const { isSignedIn} = useUser()
   const [currentView, setCurrentView] = useState('dashboard');
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [authView, setAuthView] = useState<AuthView>('login');
-
-  const handleLogin = (email: string, password: string) => {
-    console.log('Login attempt:', { email, password });
-    // Simulate successful login
-    setIsAuthenticated(true);
-  };
-
-  const handleRegister = (email: string, password: string, name: string) => {
-    console.log('Registration attempt:', { email, password, name });
-    // Simulate successful registration and show onboarding
-    setIsAuthenticated(true);
-    setShowOnboarding(true);
-  };
-
-  const handleForgotPassword = () => {
-    setAuthView('forgot-password');
-  };
-
-  const handleResetSent = (email: string) => {
-    console.log('Password reset sent to:', email);
-    // After showing success, redirect back to login
-    setTimeout(() => {
-      setAuthView('login');
-    }, 3000);
-  };
-
+  const [isAuthenticated, setIsAuthenticated] = useState(isSignedIn);
+  
   const handleOnboardingComplete = (data: OnboardingData) => {
     console.log('Onboarding completed with data:', data);
     setShowOnboarding(false);
@@ -82,6 +57,10 @@ function App() {
   };
 
   // Show authentication forms if not authenticated
+
+  if(isAuthenticated){
+    return <LoginForm />
+  }
 
   if (showOnboarding) {
     return <Onboarding onComplete={handleOnboardingComplete} />;

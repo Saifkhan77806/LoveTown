@@ -8,7 +8,6 @@ interface SidebarProps {
   onClose: () => void;
   currentView: string;
   userState: string;
-  onSignOut: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -16,7 +15,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   onClose,
   currentView,
   userState,
-  onSignOut
 }) => {
 
   const {isLoaded, user} = useUser();
@@ -69,7 +67,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             />
             <div>
               <h3 className="font-medium text-gray-900">Alex hero</h3>
-              <h2 className='font-medium text-gray-900'>{email}</h2>
+              <h2 className='font-medium text-gray-900'>{isLoaded? "User is Loding please wait 🙏" : email}</h2>
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${userState === 'matched' ? 'bg-primary-500' :
                   userState === 'chatting' ? 'bg-secondary-500' :
@@ -119,7 +117,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="p-4 border-t border-gray-200">
           <SignOutButton redirectUrl='/login'>
           <button
-            onClick={onSignOut}
             className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200"
           >
             <LogOut size={20} />
