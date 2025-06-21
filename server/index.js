@@ -3,6 +3,7 @@ const http = require('http');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const socketIO = require('socket.io');
+const connectDB = require('./db');
 
 const app = express();
 app.use(cors());
@@ -17,6 +18,7 @@ const io = socketIO(server, {
 });
 
 // Connect MongoDB
+connectDB()
 
 
 // In-memory user mapping
@@ -28,8 +30,7 @@ function getRoomId(user1, user2) {
 }
 
 io.on('connection', (socket) => {
-  console.log('Socket connected:', socket.id);
-
+ 
   socket.on('register', (userId) => {
     users.set(userId, socket.id);
     console.log(users)

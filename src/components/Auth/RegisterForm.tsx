@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Heart, Mail, Lock, User, ArrowRight, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useSignUp } from '@clerk/clerk-react';
 
 
 
 const RegisterForm = () => {
+  const {signUp, isLoaded, setActive} = useSignUp();
+  const [otp, setOtp] = useState("");
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,6 +16,7 @@ const RegisterForm = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [pendingVerification, setPendingVerification] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -63,12 +67,53 @@ const RegisterForm = () => {
     setIsLoading(true);
 
     // Simulate API call
-    setTimeout(() => {
+    try{
+
+     await signUp?.create({
+        username: formData.name,
+        emailAddress: formData.email,
+        password: formData.password
+      })
+
+     await signUp?.prepareEmailAddressVerification({strategy: "email_code"})
+     setPendingVerification(true)
+
+       setTimeout(() => {
       setIsLoading(false);
       console.log(formData)
       // navigate("/")
     }, 2000);
+
+    }catch(error){
+      alert("some thing went worng")
+      console.log(error);
+      setIsLoading(false)
+    }
+
+    
+
+
+
+   
   };
+
+  const handleVerification = async () =>{
+    if(!signUp || !setActive) return;
+
+    try{
+      const result = await signUp.attemptEmailAddressVerification({code: otp})
+      console.log(result)
+
+      if((await result).status == "complete"){
+        await setActive({session: (await result).createdSessionId})
+      }
+      
+      
+    }catch(error){
+      alert("Something went wrong during verification");
+      console.log("verfication error", error)
+    }
+  }
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -308,6 +353,17 @@ const RegisterForm = () => {
               )}
             </button>
           </form>
+
+          <div>
+            <input
+                  type="text"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200`}
+                  placeholder="Confirm your password"
+                />
+                <button onClick={handleVerification}>Confirm verification</button>
+          </div>
 
           {/* Switch to Login */}
           <div className="mt-6 text-center">

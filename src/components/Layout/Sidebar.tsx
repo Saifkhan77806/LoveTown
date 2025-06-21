@@ -1,6 +1,7 @@
 import React from 'react';
 import { Heart, Home, MessageCircle, User, Settings, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { SignOutButton, useUser } from '@clerk/clerk-react';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -18,6 +19,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   onSignOut
 }) => {
 
+  const {isLoaded, user} = useUser();
+  const email = user?.emailAddresses?.[0]?.emailAddress
+  console.log(user)
   const navigate = useNavigate();
   const navItems = [
     { id: 'dashboard', icon: Home, label: 'Home', link: "/", enabled: true },
@@ -30,6 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     navigate(`/${viewId === 'dashboard' ? '' : viewId}`);
     onClose();
   };
+
 
   return (
     <>
@@ -63,7 +68,8 @@ const Sidebar: React.FC<SidebarProps> = ({
               className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
             />
             <div>
-              <h3 className="font-medium text-gray-900">Alex</h3>
+              <h3 className="font-medium text-gray-900">Alex hero</h3>
+              <h2 className='font-medium text-gray-900'>{email}</h2>
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${userState === 'matched' ? 'bg-primary-500' :
                   userState === 'chatting' ? 'bg-secondary-500' :
@@ -111,6 +117,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Footer */}
         <div className="p-4 border-t border-gray-200">
+          <SignOutButton redirectUrl='/login'>
           <button
             onClick={onSignOut}
             className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200"
@@ -118,6 +125,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             <LogOut size={20} />
             <span className="font-medium">Sign Out</span>
           </button>
+      </SignOutButton>
+
         </div>
       </div>
     </>
