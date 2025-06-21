@@ -12,6 +12,7 @@ import RegisterForm from './components/Auth/RegisterForm';
 import ForgotPasswordForm from './components/Auth/ForgotPasswordForm';
 import { OnboardingData, Conversation } from './types';
 import { Route, Routes } from 'react-router-dom';
+import TestChat from './components/Chat/TestChatBox';
 
 type AuthView = 'login' | 'register' | 'forgot-password';
 
@@ -120,7 +121,7 @@ function App() {
     return <Onboarding onComplete={handleOnboardingComplete} />;
   }
 
-  
+
 
   return (
 
@@ -166,61 +167,63 @@ function App() {
               onUnpinMatch={unpinMatch}
             />} />
 
-              {/* Chat */}
-            <Route path='/chat' element={appState.currentMatch ? (
-          <ChatInterface
-            match={appState.currentMatch}
-            onBack={handleBackToDashboard}
-          />
-        ) : (
-          <div className="p-6 text-center">
-            <p className="text-gray-600">No active conversation</p>
-          </div>
-        )} />
+            {/* Chat */}
+            <Route path='/chat/:user1/:user2' element={appState.currentMatch ? (
+              <ChatInterface
+                match={appState.currentMatch}
+                onBack={handleBackToDashboard}
+              />
+            ) : (
+              <div className="p-6 text-center">
+                <p className="text-gray-600">No active conversation</p>
+              </div>
+            )} />
 
-        {/* profile */}
-        <Route path='/profile' element={appState.currentUser ? (
-          <Profile user={appState.currentUser} />
-        ) : null} />
+            {/* profile */}
+            <Route path='/profile' element={appState.currentUser ? (
+              <Profile user={appState.currentUser} />
+            ) : null} />
 
-        {/* Settings */}
-        <Route path='/settings' element={<div className="p-6 pt-20 pb-24">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Settings</h1>
-            <div className="space-y-4">
-              <button
-                onClick={() => setShowOnboarding(true)}
-                className="w-full p-4 bg-white rounded-xl shadow-sm text-left hover:bg-gray-50 transition-all duration-200"
-              >
-                <h3 className="font-medium text-gray-900">Retake Compatibility Assessment</h3>
-                <p className="text-sm text-gray-600 mt-1">Update your preferences and matching criteria</p>
-              </button>
-              <button className="w-full p-4 bg-white rounded-xl shadow-sm text-left hover:bg-gray-50 transition-all duration-200">
-                <h3 className="font-medium text-gray-900">Notification Settings</h3>
-                <p className="text-sm text-gray-600 mt-1">Manage how and when you receive notifications</p>
-              </button>
-              <button className="w-full p-4 bg-white rounded-xl shadow-sm text-left hover:bg-gray-50 transition-all duration-200">
-                <h3 className="font-medium text-gray-900">Privacy & Safety</h3>
-                <p className="text-sm text-gray-600 mt-1">Control your privacy and safety settings</p>
-              </button>
-              <button className="w-full p-4 bg-white rounded-xl shadow-sm text-left hover:bg-gray-50 transition-all duration-200">
-                <h3 className="font-medium text-gray-900">Help & Support</h3>
-                <p className="text-sm text-gray-600 mt-1">Get help and contact support</p>
-              </button>
-              <button
-                onClick={handleSignOut}
-                className="w-full p-4 bg-red-50 border border-red-200 rounded-xl text-left hover:bg-red-100 transition-all duration-200"
-              >
-                <h3 className="font-medium text-red-900">Sign Out</h3>
-                <p className="text-sm text-red-600 mt-1">Sign out of your account</p>
-              </button>
-            </div>
-          </div>} />
+            {/* Settings */}
+            <Route path='/settings' element={<div className="p-6 pt-20 pb-24">
+              <h1 className="text-2xl font-bold text-gray-900 mb-6">Settings</h1>
+              <div className="space-y-4">
+                <button
+                  onClick={() => setShowOnboarding(true)}
+                  className="w-full p-4 bg-white rounded-xl shadow-sm text-left hover:bg-gray-50 transition-all duration-200"
+                >
+                  <h3 className="font-medium text-gray-900">Retake Compatibility Assessment</h3>
+                  <p className="text-sm text-gray-600 mt-1">Update your preferences and matching criteria</p>
+                </button>
+                <button className="w-full p-4 bg-white rounded-xl shadow-sm text-left hover:bg-gray-50 transition-all duration-200">
+                  <h3 className="font-medium text-gray-900">Notification Settings</h3>
+                  <p className="text-sm text-gray-600 mt-1">Manage how and when you receive notifications</p>
+                </button>
+                <button className="w-full p-4 bg-white rounded-xl shadow-sm text-left hover:bg-gray-50 transition-all duration-200">
+                  <h3 className="font-medium text-gray-900">Privacy & Safety</h3>
+                  <p className="text-sm text-gray-600 mt-1">Control your privacy and safety settings</p>
+                </button>
+                <button className="w-full p-4 bg-white rounded-xl shadow-sm text-left hover:bg-gray-50 transition-all duration-200">
+                  <h3 className="font-medium text-gray-900">Help & Support</h3>
+                  <p className="text-sm text-gray-600 mt-1">Get help and contact support</p>
+                </button>
+                <button
+                  onClick={handleSignOut}
+                  className="w-full p-4 bg-red-50 border border-red-200 rounded-xl text-left hover:bg-red-100 transition-all duration-200"
+                >
+                  <h3 className="font-medium text-red-900">Sign Out</h3>
+                  <p className="text-sm text-red-600 mt-1">Sign out of your account</p>
+                </button>
+              </div>
+            </div>} />
 
-        <Route path='/' element={<Dashboard
-            appState={appState}
-            onStartChat={handleStartChat}
-            onUnpinMatch={unpinMatch}
-          />} />
+            <Route path='/' element={<Dashboard
+              appState={appState}
+              onStartChat={handleStartChat}
+              onUnpinMatch={unpinMatch}
+            />} />
+
+            <Route path='/testchat/:user1/:user2' element={<TestChat />} />
           </Routes>
         </main>
 

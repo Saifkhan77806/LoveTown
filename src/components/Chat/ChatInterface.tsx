@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Video, Phone, MoreVertical } from 'lucide-react';
 import { Match, Message } from '../../types';
+import { io } from 'socket.io-client';
+import { useParams } from 'react-router-dom';
 
 interface ChatInterfaceProps {
   match: Match;
@@ -8,33 +10,61 @@ interface ChatInterfaceProps {
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ match, onBack }) => {
+  const socket = io('http://localhost:5000');
+  const { user1, user2 } = useParams();
+  const [messageCount, setMessageCount] = useState(0)
+
+  useEffect(() => {
+    socket.emit('register', user1);
+    socket.emit('join-room', { from: user1, to: user2 });
+
+    const handleMessage = (msg: any) => {
+     setMessages((prev) => {
+    const updated = [...prev, { ...msg, timestamp: new Date(msg.timestamp) }];
+    setMessageCount(updated.length); // ✅ Update after state is created
+    return updated;
+  });
+    };
+
+    socket.on('receive-message', handleMessage);
+
+    // 👇 CLEANUP must return nothing
+    return () => {
+      socket.off('receive-message', handleMessage);
+    };
+  }, [user1, user2]);
+
   const [message, setMessage] = useState('');
+  const [whom, setWhom] = useState('')
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      senderId: match.user.id,
+      from: user1,
+      to: user2,
       content: "Hi! I'm so excited we matched. I love that we both value authenticity and mindfulness. What drew you to Lone Town?",
       timestamp: new Date(Date.now() - 60000),
       type: 'text'
     },
     {
       id: '2',
-      senderId: '1',
+      from: user1,
+      to: user2,
       content: "Hi Sam! I was getting tired of superficial connections and endless swiping. The idea of one meaningful match per day really resonates with me. What about you?",
       timestamp: new Date(Date.now() - 30000),
       type: 'text'
     },
     {
       id: '3',
-      senderId: match.user.id,
+      from: user1,
+      to: user2,
       content: "Exactly! I believe in quality over quantity. I'd rather have one deep conversation than a hundred shallow ones. Your photography work looks amazing by the way!",
       timestamp: new Date(Date.now() - 15000),
       type: 'text'
     }
   ]);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const messageCount = 34;
+ 
   const progress = (messageCount / 100) * 100;
 
   const scrollToBottom = () => {
@@ -49,12 +79,20 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ match, onBack }) => {
     if (message.trim()) {
       const newMessage: Message = {
         id: Date.now().toString(),
-        senderId: '1',
+        from: user1,
+        to: user2,
         content: message,
         timestamp: new Date(),
         type: 'text'
       };
-      setMessages([...messages, newMessage]);
+      // setMessages([...messages, newMessage]);
+      socket.emit('send-message', {
+        from: newMessage.from,
+        to: newMessage.to,
+        content: newMessage.content,
+        timestamp: newMessage.timestamp,
+        type: newMessage.type
+      });
       setMessage('');
     }
   };
@@ -74,8 +112,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ match, onBack }) => {
           <button onClick={onBack} className="text-gray-600 hover:text-gray-900">
             ←
           </button>
-          <img 
-            src={match.user.photos[0]} 
+          <img
+            src={match.user.photos[0]}
             alt={match.user.name}
             className="w-10 h-10 rounded-full object-cover"
           />
@@ -85,23 +123,21 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ match, onBack }) => {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button 
+          <button
             disabled={messageCount < 100}
-            className={`p-2 rounded-full transition-all duration-200 ${
-              messageCount >= 100 
-                ? 'text-primary-600 hover:bg-primary-50' 
-                : 'text-gray-300 cursor-not-allowed'
-            }`}
+            className={`p-2 rounded-full transition-all duration-200 ${messageCount >= 100
+              ? 'text-primary-600 hover:bg-primary-50'
+              : 'text-gray-300 cursor-not-allowed'
+              }`}
           >
             <Video size={20} />
           </button>
-          <button 
+          <button
             disabled={messageCount < 100}
-            className={`p-2 rounded-full transition-all duration-200 ${
-              messageCount >= 100 
-                ? 'text-primary-600 hover:bg-primary-50' 
-                : 'text-gray-300 cursor-not-allowed'
-            }`}
+            className={`p-2 rounded-full transition-all duration-200 ${messageCount >= 100
+              ? 'text-primary-600 hover:bg-primary-50'
+              : 'text-gray-300 cursor-not-allowed'
+              }`}
           >
             <Phone size={20} />
           </button>
@@ -110,6 +146,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ match, onBack }) => {
           </button>
         </div>
       </div>
+      {/* For whom to send the chat enter here */}
+      <input type="text" placeholder='For whom to send the chat enter here. ' className='p-2 w-full border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent my-2 mx-1' onChange={(e) => setWhom(e.target.value)} value={whom} />
 
       {/* Progress Banner */}
       <div className="bg-gradient-to-r from-primary-50 to-secondary-50 p-3 border-b border-gray-100">
@@ -120,7 +158,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ match, onBack }) => {
           </span>
         </div>
         <div className="w-full bg-white rounded-full h-2">
-          <div 
+          <div
             className="bg-gradient-to-r from-primary-500 to-secondary-500 h-2 rounded-full transition-all duration-500"
             style={{ width: `${Math.min(progress, 100)}%` }}
           ></div>
@@ -130,18 +168,16 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ match, onBack }) => {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((msg) => {
-          const isOwn = msg.senderId === '1';
+          const isOwn = msg.from === user1;
           return (
             <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] p-3 rounded-2xl ${
-                isOwn 
-                  ? 'bg-primary-600 text-white rounded-br-md' 
-                  : 'bg-gray-100 text-gray-900 rounded-bl-md'
-              }`}>
-                <p className="text-sm leading-relaxed">{msg.content}</p>
-                <p className={`text-xs mt-1 ${
-                  isOwn ? 'text-primary-100' : 'text-gray-500'
+              <div className={`max-w-[80%] p-3 rounded-2xl ${isOwn
+                ? 'bg-primary-600 text-white rounded-br-md'
+                : 'bg-gray-100 text-gray-900 rounded-bl-md'
                 }`}>
+                <p className="text-sm leading-relaxed">{msg.content}</p>
+                <p className={`text-xs mt-1 ${isOwn ? 'text-primary-100' : 'text-gray-500'
+                  }`}>
                   {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
@@ -168,11 +204,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ match, onBack }) => {
           <button
             onClick={sendMessage}
             disabled={!message.trim()}
-            className={`p-3 rounded-full transition-all duration-200 ${
-              message.trim()
-                ? 'bg-primary-600 text-white shadow-lg hover:bg-primary-700'
-                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            }`}
+            className={`p-3 rounded-full transition-all duration-200 ${message.trim()
+              ? 'bg-primary-600 text-white shadow-lg hover:bg-primary-700'
+              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              }`}
           >
             <Send size={18} />
           </button>

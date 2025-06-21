@@ -26,9 +26,10 @@ export interface Match {
 
 export interface Message {
   id: string;
-  senderId: string;
   content: string;
   timestamp: Date;
+  from: string | undefined;
+  to: string | undefined;
   type: 'text' | 'voice' | 'system';
 }
 
