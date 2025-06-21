@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Heart, Mail, Lock, ArrowRight } from 'lucide-react';
 
-interface LoginFormProps {
-  onLogin: (email: string, password: string) => void;
-  onSwitchToRegister: () => void;
-  onForgotPassword: () => void;
-}
 
-const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onSwitchToRegister, onForgotPassword }) => {
+
+const LoginForm = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -44,7 +40,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onSwitchToRegister, onFo
     
     // Simulate API call
     setTimeout(() => {
-      onLogin(formData.email, formData.password);
       setIsLoading(false);
     }, 1500);
   };
@@ -134,7 +129,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onSwitchToRegister, onFo
             <div className="text-right">
               <button
                 type="button"
-                onClick={onForgotPassword}
                 className="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200"
               >
                 Forgot your password?
@@ -167,7 +161,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onSwitchToRegister, onFo
             <p className="text-gray-600">
               New to Lone Town?{' '}
               <button
-                onClick={onSwitchToRegister}
                 className="text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200"
               >
                 Create an account

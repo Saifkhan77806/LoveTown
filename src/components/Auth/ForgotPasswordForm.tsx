@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
 import { Mail, ArrowLeft, ArrowRight, CheckCircle } from 'lucide-react';
 
-interface ForgotPasswordFormProps {
-  onBack: () => void;
-  onResetSent: (email: string) => void;
-}
 
-const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBack, onResetSent }) => {
+const ForgotPasswordForm = () => {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -18,12 +14,12 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBack, onReset
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email) {
       setError('Email is required');
       return;
     }
-    
+
     if (!validateEmail(email)) {
       setError('Please enter a valid email address');
       return;
@@ -31,12 +27,11 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBack, onReset
 
     setIsLoading(true);
     setError('');
-    
+
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
       setIsSuccess(true);
-      onResetSent(email);
     }, 1500);
   };
 
@@ -55,24 +50,23 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBack, onReset
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="text-green-600" size={32} />
             </div>
-            
+
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Check your email</h2>
             <p className="text-gray-600 mb-6 leading-relaxed">
               We've sent password reset instructions to{' '}
               <span className="font-medium text-gray-900">{email}</span>
             </p>
-            
+
             <div className="space-y-4">
               <button
-                onClick={onBack}
                 className="w-full py-3 px-4 bg-primary-600 text-white rounded-xl font-semibold hover:bg-primary-700 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 Back to Sign In
               </button>
-              
+
               <p className="text-sm text-gray-500">
                 Didn't receive the email? Check your spam folder or{' '}
-                <button 
+                <button
                   onClick={() => setIsSuccess(false)}
                   className="text-primary-600 hover:text-primary-700 font-medium"
                 >
@@ -92,13 +86,12 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBack, onReset
         {/* Header */}
         <div className="text-center mb-8">
           <button
-            onClick={onBack}
             className="inline-flex items-center gap-2 text-primary-100 hover:text-white transition-colors duration-200 mb-6"
           >
             <ArrowLeft size={20} />
             Back to Sign In
           </button>
-          
+
           <h1 className="text-3xl font-bold text-white mb-2">Reset Password</h1>
           <p className="text-primary-100">
             Enter your email and we'll send you reset instructions
@@ -121,11 +114,10 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBack, onReset
                   type="email"
                   value={email}
                   onChange={(e) => handleChange(e.target.value)}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${
-                    error 
-                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                  className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${error
+                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                       : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
-                  }`}
+                    }`}
                   placeholder="Enter your email address"
                 />
               </div>
@@ -138,11 +130,10 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBack, onReset
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 ${
-                isLoading
+              className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 ${isLoading
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-primary-600 hover:bg-primary-700 shadow-lg hover:shadow-xl'
-              }`}
+                }`}
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -160,7 +151,6 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBack, onReset
             <p className="text-sm text-gray-600">
               Remember your password?{' '}
               <button
-                onClick={onBack}
                 className="text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200"
               >
                 Sign in instead

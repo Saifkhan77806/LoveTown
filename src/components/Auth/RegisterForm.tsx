@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Heart, Mail, Lock, User, ArrowRight, Check } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-interface RegisterFormProps {
-  onRegister: (email: string, password: string, name: string) => void;
-  onSwitchToLogin: () => void;
-}
 
-const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, onSwitchToLogin }) => {
+
+const RegisterForm = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -18,6 +16,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, onSwitchToLogin
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const navigate = useNavigate();
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -58,15 +57,16 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, onSwitchToLogin
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setIsLoading(true);
-    
+
     // Simulate API call
     setTimeout(() => {
-      onRegister(formData.email, formData.password, formData.name);
       setIsLoading(false);
+      console.log(formData)
+      // navigate("/")
     }, 2000);
   };
 
@@ -80,13 +80,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, onSwitchToLogin
   const getPasswordStrength = () => {
     const password = formData.password;
     let strength = 0;
-    
+
     if (password.length >= 8) strength++;
     if (/[a-z]/.test(password)) strength++;
     if (/[A-Z]/.test(password)) strength++;
     if (/\d/.test(password)) strength++;
     if (/[^A-Za-z0-9]/.test(password)) strength++;
-    
+
     return strength;
   };
 
@@ -132,11 +132,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, onSwitchToLogin
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleChange('name', e.target.value)}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${
-                    errors.name 
-                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                  className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${errors.name
+                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                       : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
-                  }`}
+                    }`}
                   placeholder="Your full name"
                 />
               </div>
@@ -158,11 +157,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, onSwitchToLogin
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleChange('email', e.target.value)}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${
-                    errors.email 
-                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                  className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${errors.email
+                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                       : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
-                  }`}
+                    }`}
                   placeholder="your@email.com"
                 />
               </div>
@@ -184,11 +182,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, onSwitchToLogin
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => handleChange('password', e.target.value)}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${
-                    errors.password 
-                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                  className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${errors.password
+                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                       : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
-                  }`}
+                    }`}
                   placeholder="Create a strong password"
                 />
                 <button
@@ -199,13 +196,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, onSwitchToLogin
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              
+
               {/* Password Strength Indicator */}
               {formData.password && (
                 <div className="mt-2">
                   <div className="flex items-center gap-2 mb-1">
                     <div className="flex-1 bg-gray-200 rounded-full h-2">
-                      <div 
+                      <div
                         className={`h-2 rounded-full transition-all duration-300 ${getStrengthColor()}`}
                         style={{ width: `${(getPasswordStrength() / 5) * 100}%` }}
                       ></div>
@@ -214,7 +211,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, onSwitchToLogin
                   </div>
                 </div>
               )}
-              
+
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600 animate-fade-in">{errors.password}</p>
               )}
@@ -233,11 +230,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, onSwitchToLogin
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
                   onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${
-                    errors.confirmPassword 
-                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                  className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${errors.confirmPassword
+                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                       : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
-                  }`}
+                    }`}
                   placeholder="Confirm your password"
                 />
                 <button
@@ -268,11 +264,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, onSwitchToLogin
                     }}
                     className="sr-only"
                   />
-                  <div className={`w-5 h-5 border-2 rounded transition-all duration-200 ${
-                    agreedToTerms 
-                      ? 'bg-primary-600 border-primary-600' 
+                  <div className={`w-5 h-5 border-2 rounded transition-all duration-200 ${agreedToTerms
+                      ? 'bg-primary-600 border-primary-600'
                       : 'border-gray-300 hover:border-primary-400'
-                  }`}>
+                    }`}>
                     {agreedToTerms && (
                       <Check className="w-3 h-3 text-white m-0.5" strokeWidth={3} />
                     )}
@@ -298,11 +293,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, onSwitchToLogin
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 ${
-                isLoading
+              className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 ${isLoading
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-primary-600 hover:bg-primary-700 shadow-lg hover:shadow-xl'
-              }`}
+                }`}
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -320,7 +314,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, onSwitchToLogin
             <p className="text-gray-600">
               Already have an account?{' '}
               <button
-                onClick={onSwitchToLogin}
                 className="text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200"
               >
                 Sign in

@@ -82,40 +82,6 @@ function App() {
   };
 
   // Show authentication forms if not authenticated
-  if (!isAuthenticated) {
-    switch (authView) {
-      case 'login':
-        return (
-          <LoginForm
-            onLogin={handleLogin}
-            onSwitchToRegister={() => setAuthView('register')}
-            onForgotPassword={handleForgotPassword}
-          />
-        );
-      case 'register':
-        return (
-          <RegisterForm
-            onRegister={handleRegister}
-            onSwitchToLogin={() => setAuthView('login')}
-          />
-        );
-      case 'forgot-password':
-        return (
-          <ForgotPasswordForm
-            onBack={() => setAuthView('login')}
-            onResetSent={handleResetSent}
-          />
-        );
-      default:
-        return (
-          <LoginForm
-            onLogin={handleLogin}
-            onSwitchToRegister={() => setAuthView('register')}
-            onForgotPassword={handleForgotPassword}
-          />
-        );
-    }
-  }
 
   if (showOnboarding) {
     return <Onboarding onComplete={handleOnboardingComplete} />;
@@ -159,6 +125,24 @@ function App() {
         <main className="flex-1 pt-16 lg:pt-0">
           {/* {renderCurrentView()} */}
           <Routes>
+
+            {/* Register */}
+            <Route path='/register' element={
+              <RegisterForm
+          />
+            } />
+
+            {/* Login */}
+            <Route path='/login' element={
+              <LoginForm />
+            } />
+
+            {/* Forgot-password */}
+            <Route path='/forgot-password' element={
+              <ForgotPasswordForm
+            
+          />
+            } />
 
             {/* dashboard */}
             <Route path='/dashboard' element={<Dashboard
