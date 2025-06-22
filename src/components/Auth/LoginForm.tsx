@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Heart, Mail, Lock, ArrowRight } from 'lucide-react';
+import { useSignIn } from '@clerk/clerk-react';
+import { useNavigate } from 'react-router-dom';
 
 
 
@@ -11,6 +13,8 @@ const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
+  const {signIn, setActive, isLoaded} = useSignIn();
+  const navigate = useNavigate();
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -35,8 +39,24 @@ const LoginForm = () => {
     e.preventDefault();
     
     if (!validateForm()) return;
+    if(!isLoaded) return
 
     setIsLoading(true);
+
+    const {email, password} = formData;
+
+    const result = await signIn?.create({
+      identifier: email, 
+      password
+    })
+
+    if(result?.status === "complete"){
+       await setActive({ session: result.createdSessionId });
+       navigate("/");
+
+    }
+
+    
     
     // Simulate API call
     setTimeout(() => {

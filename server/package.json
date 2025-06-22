@@ -2,6 +2,7 @@
   "name": "lovetown",
   "version": "1.0.0",
   "description": "Lone Town is a mindful dating web app that provides one deeply compatible match per day, encouraging intentional connections through exclusive matching, emotional assessments, real-time chat, and milestone-based video calling. Built with React.js and Node.js (Express + Socket.io).",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

@@ -5,6 +5,7 @@ import { AppState, UserState, Match, User, Conversation } from '../types';
 const mockUser: User = {
   id: '1',
   name: 'Alex',
+  email: 'alex@example.com',
   age: 28,
   bio: 'Passionate about mindful living and deep connections',
   photos: ['https://images.pexels.com/photos/1239288/pexels-photo-1239288.jpeg'],
@@ -22,6 +23,7 @@ const mockMatch: Match = {
   user: {
     id: '2',
     name: 'Sam',
+    email: 'sam@example.com',
     age: 26,
     bio: 'Artist and dreamer seeking genuine connection in a world of superficial swipes',
     photos: ['https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg'],

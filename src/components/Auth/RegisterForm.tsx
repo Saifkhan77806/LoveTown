@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Eye, EyeOff, Heart, Mail, Lock, User, ArrowRight, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSignUp } from '@clerk/clerk-react';
+import axios from 'axios';
 
 
 
@@ -16,7 +17,7 @@ const RegisterForm = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [pendingVerification, setPendingVerification] = useState(false);
+  const [pendingVerification, setPendingVerification] = useState(true);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -77,6 +78,11 @@ const RegisterForm = () => {
 
       await signUp?.prepareEmailAddressVerification({ strategy: "email_code" })
       setPendingVerification(true)
+      await axios.post("/create-user", {name: formData.name, email: formData.email}).then((res)=>{
+        console.log(res.data)
+      }).catch((err)=>{
+        console.log("error during storing data", err)
+      })
 
       setTimeout(() => {
         setIsLoading(false);
@@ -358,7 +364,7 @@ const RegisterForm = () => {
 
           {
             pendingVerification &&
-            <div>
+            <div className='my-3'>
               <input
                 type="text"
                 value={otp}
@@ -366,7 +372,11 @@ const RegisterForm = () => {
                 className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200`}
                 placeholder="Confirm your password"
               />
-              <button onClick={handleVerification}>Confirm verification</button>
+              <button
+              type="submit"
+              onClick={handleVerification}
+              className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 my-3 bg-primary-600 hover:bg-primary-700 shadow-lg hover:shadow-xl'`}
+            >Create Account <ArrowRight size={18} /></button>
             </div>
           }
 

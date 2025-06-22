@@ -67,7 +67,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             />
             <div>
               <h3 className="font-medium text-gray-900">Alex hero</h3>
-              <h2 className='font-medium text-gray-900'>{isLoaded? "User is Loding please wait 🙏" : email}</h2>
+              <h2 className='font-medium text-gray-900'>{email}</h2>
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${userState === 'matched' ? 'bg-primary-500' :
                   userState === 'chatting' ? 'bg-secondary-500' :

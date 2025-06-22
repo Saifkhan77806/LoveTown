@@ -1,16 +1,20 @@
-const express = require('express');
-const http = require('http');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const socketIO = require('socket.io');
-const connectDB = require('./db');
+
+import express from 'express'
+import http from 'http'
+import mongoose from 'mongoose';
+import cors from 'cors';
+import {Server as socketIO} from 'socket.io';
+import {connectDB} from './db.js';
+import { User } from './models/User.js';
+import { getUserByEmail } from './data/user.js';
+// import router from './routes/userRoutes.js';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 const server = http.createServer(app);
-const io = socketIO(server, {
+const io = new socketIO(server, {
   cors: {
     origin: 'http://localhost:5173',
     methods: ['GET', 'POST']
@@ -59,7 +63,24 @@ io.on('connection', (socket) => {
 app.post('/get-messages', async (req, res) => {
   const { from, to } = req.body;
   const roomId = getRoomId(from, to);
-  
 });
+
+
+app.post('/create-user', async (req, res) => {
+  try {
+    const isUser = await getUserByEmail(req.body.email);
+    if(isUser) return res.status(400).json({ success: false, data: "User already exits" });
+    
+    const user = new User(req.body);
+    const saved = await user.save();
+
+   return res.status(201).json({ success: true, data: saved });
+  } catch (err) {
+     return res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+
+
 
 server.listen(5000, () => console.log('Server running on port 5000'));
