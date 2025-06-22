@@ -4,6 +4,8 @@ import AvailableState from './AvailableState';
 import MatchedState from './MatchedState';
 import FrozenState from './FrozenState';
 import ChattingState from './ChattingState';
+import { Middleware } from "../../../middleware"
+import { useLocation } from 'react-router-dom';
 
 interface DashboardProps {
   appState: AppState;
@@ -12,6 +14,15 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ appState, onStartChat, onUnpinMatch }) => {
+
+   const location = useLocation()
+  
+    Middleware(location.pathname)
+  
+
+
+
+
   const renderCurrentState = () => {
     switch (appState.userState) {
       case 'available':

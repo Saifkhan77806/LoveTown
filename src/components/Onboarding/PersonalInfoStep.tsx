@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Camera, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useUser } from '@clerk/clerk-react';
 
 interface PersonalInfoStepProps {
   data: any;
@@ -9,9 +10,14 @@ interface PersonalInfoStepProps {
 }
 
 const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ data, onUpdate, onNext, onPrev }) => {
+
+  const { user } = useUser()
+
   const [formData, setFormData] = useState({
-    name: data.personalInfo?.name || '',
+    name: user?.username,
+    email: user?.emailAddresses?.[0]?.emailAddress,
     age: data.personalInfo?.age || '',
+    gender: data.personalInfo?.gender || '',
     location: data.personalInfo?.location || '',
     bio: data.personalInfo?.bio || '',
     photos: data.personalInfo?.photos || ['https://images.pexels.com/photos/1239288/pexels-photo-1239288.jpeg']
@@ -23,7 +29,7 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ data, onUpdate, onN
     onUpdate({ personalInfo: newData });
   };
 
-  const canProceed = formData.name && formData.age && formData.location && formData.bio;
+  const canProceed = formData.name && formData.age && formData.location && formData.bio && formData.gender;
 
   return (
     <div className="p-6">
@@ -37,8 +43,8 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ data, onUpdate, onN
         <label className="block text-sm font-medium text-gray-700 mb-3">Profile Photo</label>
         <div className="flex justify-center">
           <div className="relative">
-            <img 
-              src={formData.photos[0]} 
+            <img
+              src={formData.photos[0]}
               alt="Profile preview"
               className="w-24 h-24 rounded-full object-cover border-4 border-gray-200"
             />
@@ -55,8 +61,19 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ data, onUpdate, onN
           <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
           <input
             type="text"
-            value={formData.name}
-            onChange={(e) => handleChange('name', e.target.value)}
+            value={formData?.name as string}
+            readOnly
+            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
+            placeholder="Your first name"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+          <input
+            type="text"
+            value={formData.email}
+            readOnly
             className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
             placeholder="Your first name"
           />
@@ -73,6 +90,36 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ data, onUpdate, onN
             min="18"
             max="99"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Age</label>
+          <div className='flex gap-2'>
+            <input
+              type="radio"
+              value={formData.age}
+              name='gender'
+              id='male'
+              onChange={(e) => handleChange('gender', e.target.value || '')}
+              className="p-3 border border-gray-300 rounded-xl "
+              placeholder="Male"
+            />
+            <label htmlFor="male">Male</label>
+          </div>
+
+          <div className='flex gap-2'>
+            <input
+              type="radio"
+              value={formData.age}
+              name='gender'
+              id='female'
+              onChange={(e) => handleChange('gender', e.target.value || '')}
+              className="p-3 border border-gray-300 rounded-x"
+              placeholder="female"
+            />
+            <label htmlFor="female">Female</label>
+          </div>
+
         </div>
 
         <div>
@@ -113,11 +160,10 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ data, onUpdate, onN
         <button
           onClick={onNext}
           disabled={!canProceed}
-          className={`flex-1 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
-            canProceed
+          className={`flex-1 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${canProceed
               ? 'bg-primary-600 text-white hover:bg-primary-700'
               : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-          }`}
+            }`}
         >
           Continue
           <ChevronRight size={16} />

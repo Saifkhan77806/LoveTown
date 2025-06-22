@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Heart, Mail, Lock, User, ArrowRight, Check } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useSignUp } from '@clerk/clerk-react';
+import { Middleware } from "../../../middleware"
 import axios from 'axios';
 
 
 
 const RegisterForm = () => {
   const { signUp, setActive } = useSignUp();
+  const location = useLocation()
+
+  Middleware(location.pathname)
+
   const [otp, setOtp] = useState("");
   const [formData, setFormData] = useState({
     name: '',
@@ -76,13 +81,15 @@ const RegisterForm = () => {
         password: formData.password
       })
 
+      await axios.post("http://localhost:5000/create-user", { name: formData.name, email: formData.email }).then((res) => {
+        console.log(res.data)
+        if (res.status !== 200) return
+      }).catch((err) => {
+        console.log("error during storing data", err)
+        return;
+      })
       await signUp?.prepareEmailAddressVerification({ strategy: "email_code" })
       setPendingVerification(true)
-      await axios.post("/create-user", {name: formData.name, email: formData.email}).then((res)=>{
-        console.log(res.data)
-      }).catch((err)=>{
-        console.log("error during storing data", err)
-      })
 
       setTimeout(() => {
         setIsLoading(false);
@@ -373,10 +380,10 @@ const RegisterForm = () => {
                 placeholder="Confirm your password"
               />
               <button
-              type="submit"
-              onClick={handleVerification}
-              className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 my-3 bg-primary-600 hover:bg-primary-700 shadow-lg hover:shadow-xl'`}
-            >Create Account <ArrowRight size={18} /></button>
+                type="submit"
+                onClick={handleVerification}
+                className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 my-3 bg-primary-600 hover:bg-primary-700 shadow-lg hover:shadow-xl'`}
+              >Create Account <ArrowRight size={18} /></button>
             </div>
           }
 

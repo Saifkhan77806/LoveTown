@@ -14,7 +14,6 @@ const UserSchema = new mongoose.Schema({
   personalityType: String,
   relationshipGoals: String,
   communicationStyle: String,
-  emotionalIntelligence: Number
 }, { timestamps: true });
 
 export const User = mongoose.model('User', UserSchema);

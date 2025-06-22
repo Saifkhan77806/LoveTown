@@ -1,10 +1,9 @@
 
 import express from 'express'
 import http from 'http'
-import mongoose from 'mongoose';
 import cors from 'cors';
-import {Server as socketIO} from 'socket.io';
-import {connectDB} from './db.js';
+import { Server as socketIO } from 'socket.io';
+import { connectDB } from './db.js';
 import { User } from './models/User.js';
 import { getUserByEmail } from './data/user.js';
 // import router from './routes/userRoutes.js';
@@ -34,7 +33,7 @@ function getRoomId(user1, user2) {
 }
 
 io.on('connection', (socket) => {
- 
+
   socket.on('register', (userId) => {
     users.set(userId, socket.id);
     console.log(users)
@@ -46,10 +45,10 @@ io.on('connection', (socket) => {
     console.log(roomId)
   });
 
-  socket.on('send-message', async ({id, from, to, content, timestamp, type }) => {
+  socket.on('send-message', async ({ id, from, to, content, timestamp, type }) => {
     const roomId = getRoomId(from, to);
 
-    io.to(roomId).emit('receive-message', {id, from, to, content, timestamp, type });
+    io.to(roomId).emit('receive-message', { id, from, to, content, timestamp, type });
   });
 
   socket.on('disconnect', () => {
@@ -69,16 +68,38 @@ app.post('/get-messages', async (req, res) => {
 app.post('/create-user', async (req, res) => {
   try {
     const isUser = await getUserByEmail(req.body.email);
-    if(isUser) return res.status(400).json({ success: false, data: "User already exits" });
-    
+    if (isUser) return res.status(400).json({ success: false, data: "User already exits" });
+
     const user = new User(req.body);
     const saved = await user.save();
 
-   return res.status(201).json({ success: true, data: saved });
+    return res.status(201).json({ success: true, data: saved });
   } catch (err) {
-     return res.status(400).json({ success: false, message: err.message });
+    return res.status(400).json({ success: false, message: err.message });
   }
 });
+
+
+app.put("/onboard-user", async (req, res) => {
+  const { email, age, bio, gender, photos, location, interests, values, personalityType, relationshipGoals, communicationStyle } = req.body;
+
+  try {
+    const user = await User.findOneAndUpdate({ email },
+      { age, bio, gender, photos, location, interests, values, personalityType, relationshipGoals, communicationStyle },
+      { new: true }
+    );
+
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    res.status(200).json({ success: true, data: user });
+  } catch (err) {
+    return res.status(400).json({ success: false, message: err.message });
+  }
+
+
+
+
+})
 
 
 

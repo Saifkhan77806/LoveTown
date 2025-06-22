@@ -59,6 +59,7 @@ export interface AppState {
 export interface OnboardingData {
   personalInfo: {
     name: string;
+    email: string;
     age: number;
     location: string;
     bio: string;
@@ -77,4 +78,5 @@ export interface OnboardingData {
     maxDistance: number;
     importantTraits: string[];
   };
+
 }

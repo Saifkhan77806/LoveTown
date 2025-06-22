@@ -11,19 +11,43 @@ import LoginForm from './components/Auth/LoginForm';
 import RegisterForm from './components/Auth/RegisterForm';
 import ForgotPasswordForm from './components/Auth/ForgotPasswordForm';
 import { OnboardingData, Conversation } from './types';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useNavigate } from 'react-router-dom';
 import TestChat from './components/Chat/TestChatBox';
+import axios from 'axios';
+import { useUser } from '@clerk/clerk-react';
 
 function App() {
   const { appState, updateUserState, unpinMatch, startConversation } = useAppState();
+  const { user } = useUser()
+  const navigate = useNavigate()
   const [currentView, setCurrentView] = useState('dashboard');
   const [showOnboarding, setShowOnboarding] = useState(false);
-  
 
-  const handleOnboardingComplete = (data: OnboardingData) => {
+
+  const handleOnboardingComplete = async (data: OnboardingData) => {
+
     console.log('Onboarding completed with data:', data);
+    //TODO:-  update data here for onboarding !
+
+    const { communicationStyle, interests, personalityType, relationshipGoals, values } = data.compatibility;
+    const { age, bio, email, location } = data.personalInfo;
+
+    axios.put("http://localhost:5000/onboard-user", { communicationStyle, interests, personalityType, relationshipGoals, values, age, bio, email, location, photos: user?.imageUrl }).then((res) => {
+      console.log(res.data);
+    }).catch((error) => {
+      console.log("During onBoarding setUp:-", error);
+    })
+
+    await user?.update({
+      unsafeMetadata: { communicationStyle, interests, personalityType, relationshipGoals, values, age, bio, location }
+    })
+
+    navigate('/dashboard')
+
+
     setShowOnboarding(false);
     updateUserState('available');
+
   };
 
   const handleStartChat = () => {
@@ -48,7 +72,7 @@ function App() {
   };
 
 
- 
+
   // Show authentication forms if not authenticated
 
   if (showOnboarding) {
@@ -93,32 +117,40 @@ function App() {
           {/* {renderCurrentView()} */}
           <Routes>
 
-            {/* Register */}
+            {/* Register 
+            In this route after register you will not redirected to this page until and unless after doing logout
+            */}
             <Route path='/register' element={
               <RegisterForm
-          />
+              />
             } />
 
-            {/* Login */}
+            {/* Login
+            In this route after login you will you redirected to this page until and unless after doing logout
+            */}
             <Route path='/login' element={
               <LoginForm />
             } />
 
-            {/* Forgot-password */}
+            {/* Forgot-password
+            In this route after login or register you will you redirected to this page until and unless after doing logout
+            */}
             <Route path='/forgot-password' element={
-              <ForgotPasswordForm
-            
-          />
+              <ForgotPasswordForm />
             } />
 
-            {/* dashboard */}
+            {/* dashboard 
+            In this route you only can access after doing login or register
+            */}
             <Route path='/dashboard' element={<Dashboard
               appState={appState}
               onStartChat={handleStartChat}
               onUnpinMatch={unpinMatch}
             />} />
 
-            {/* Chat */}
+            {/* Chat
+            In this route you only can access after doing login or register 
+            */}
             <Route path='/chat/:user1/:user2' element={appState.currentMatch ? (
               <ChatInterface
                 match={appState.currentMatch}
@@ -130,17 +162,21 @@ function App() {
               </div>
             )} />
 
-            {/* profile */}
+            {/* profile 
+            In this route you only can access after doing login or register
+            */}
             <Route path='/profile' element={appState.currentUser ? (
               <Profile user={appState.currentUser} />
             ) : null} />
 
-            {/* Settings */}
+            {/* Settings
+            In this route you only can access after doing login or register
+            */}
             <Route path='/settings' element={<div className="p-6 pt-20 pb-24">
               <h1 className="text-2xl font-bold text-gray-900 mb-6">Settings</h1>
               <div className="space-y-4">
                 <button
-                  onClick={() => setShowOnboarding(true)}
+                  onClick={() => navigate("/onboarding-user")}
                   className="w-full p-4 bg-white rounded-xl shadow-sm text-left hover:bg-gray-50 transition-all duration-200"
                 >
                   <h3 className="font-medium text-gray-900">Retake Compatibility Assessment</h3>
@@ -167,6 +203,7 @@ function App() {
               </div>
             </div>} />
 
+            {/* In this routes you can access without doing login or register and then not you will rediected to previous page */}
             <Route path='/' element={<Dashboard
               appState={appState}
               onStartChat={handleStartChat}
@@ -174,6 +211,8 @@ function App() {
             />} />
 
             <Route path='/testchat/:user1/:user2' element={<TestChat />} />
+
+            <Route path='/onboarding-user' element={<Onboarding onComplete={handleOnboardingComplete} />} />
           </Routes>
         </main>
 

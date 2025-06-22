@@ -23,7 +23,7 @@ const PreferencesStep: React.FC<PreferencesStepProps> = ({ data, onUpdate, onNex
 
   const toggleTrait = (trait: string) => {
     const updated = formData.importantTraits.includes(trait)
-      ? formData.importantTraits.filter(t => t !== trait)
+      ? formData.importantTraits.filter((t : any) => t !== trait)
       : [...formData.importantTraits, trait];
     
     const newData = { ...formData, importantTraits: updated };
@@ -54,6 +54,8 @@ const PreferencesStep: React.FC<PreferencesStepProps> = ({ data, onUpdate, onNex
   };
 
   const canProceed = formData.importantTraits.length >= 3;
+
+  
 
   return (
     <div className="p-6 max-h-[80vh] overflow-y-auto">

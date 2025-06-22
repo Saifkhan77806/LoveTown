@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { ChevronRight, Heart } from 'lucide-react';
 import PersonalInfoStep from './PersonalInfoStep';
 import CompatibilityStep from './CompatibilityStep';
 import PreferencesStep from './PreferencesStep';
@@ -11,6 +10,7 @@ interface OnboardingProps {
 }
 
 const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
+
   const [currentStep, setCurrentStep] = useState(0);
   const [data, setData] = useState<Partial<OnboardingData>>({});
 

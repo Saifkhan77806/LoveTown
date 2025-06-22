@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Heart, Mail, Lock, ArrowRight } from 'lucide-react';
 import { useSignIn } from '@clerk/clerk-react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 
 
@@ -180,11 +180,12 @@ const LoginForm = () => {
           <div className="mt-6 text-center">
             <p className="text-gray-600">
               New to Lone Town?{' '}
-              <button
+              <Link
+              to="/register"
                 className="text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200"
               >
                 Create an account
-              </button>
+              </Link>
             </p>
           </div>
         </div>
