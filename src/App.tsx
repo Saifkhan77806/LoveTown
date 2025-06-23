@@ -35,23 +35,27 @@ function App() {
     axios.put("http://localhost:5000/onboard-user", { communicationStyle, interests, personalityType, relationshipGoals, values, age, bio, email, gender, location, photos: user?.imageUrl, mood }).then((res) => {
       console.log("onboarding Data", res.data);
 
-      axios.get(`http://localhost:5000/match/${email}`).then((res) => {
-        const result = res.data.results[0];
-
-        console.log("Matched user", result);
-
-        axios.post("http://localhost:5000/create-appstate", { user1: res.data.user1, user2: result?._id, compatibilityScore: result?.matchScore, isPinned: true }).then((res) => {
-          console.log("Matched data is stored in DB", res.data)
-        }).catch((error) => {
-          console.log("Matched data stroing error", error)
-        })
-
-
-
+      axios.post("http://localhost:5000/api/schedule", { jobId: email, data: email }).then((res) => {
+        console.log("schedule", res.data);
 
       }).catch((error) => {
-        console.log("During onBoarding setUp:-", error);
+        console.log(error)
       })
+
+
+      // axios.get(`http://localhost:5000/match/${email}`).then((res) => {
+      //   const result = res.data.results[0];
+      //   console.log("Matched user", result);
+
+      // axios.post("http://localhost:5000/create-appstate", { user1: res.data.user1, user2: result?._id, compatibilityScore: result?.matchScore, isPinned: true }).then((res) => {
+      //   console.log("Matched data is stored in DB", res.data)
+      // }).catch((error) => {
+      //   console.log("Matched data stroing error", error)
+      // })
+
+      // }).catch((error) => {
+      //   console.log("During onBoarding setUp:-", error);
+      // })
 
     }
     ).catch((error) => {

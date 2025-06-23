@@ -8,6 +8,8 @@ import { User } from './models/User.js';
 import { getUserByEmail } from './data/user.js';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Match } from './models/Match..js';
+import { cancelJob, getAllJobs, scheduleJob } from './helper/cronManager.js';
+import { createMatch } from './helper/createMatch.js';
 
 const app = express();
 app.use(cors());
@@ -177,6 +179,39 @@ app.post("/create-appstate", async (req, res) => {
     return res.status(400).json({ success: false, message: error.message });
   }
 })
+
+
+app.post('/api/schedule', (req, res) => {
+  const { jobId, data } = req.body;
+
+  const date = new Date(Date.now() + 5 * 60 * 1000); // 2 hours later
+
+  scheduleJob(jobId, date, async () => {
+    console.log("data")
+    const result = await createMatch(data)
+
+    
+    // Add DB cleanup or email, etc.
+  });
+
+  res.json({ success: true, message: 'Cron job scheduled' });
+});
+
+app.post('/api/cancel', (req, res) => {
+  const { jobId } = req.body;
+  const success = cancelJob(jobId);
+
+  if (success) {
+    res.json({ success: true, message: 'Job cancelled' });
+  } else {
+    res.status(404).json({ success: false, message: 'Job not found' });
+  }
+});
+
+app.get('/api/jobs', (req, res) => {
+  const jobs = getAllJobs();
+  res.json({ success: true, jobs });
+});
 
 
 
