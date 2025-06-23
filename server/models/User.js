@@ -11,9 +11,12 @@ const UserSchema = new mongoose.Schema({
   location: String,
   interests: [String],
   values: [String],
+  mood: String,
   personalityType: String,
   relationshipGoals: String,
   communicationStyle: String,
+  bioEmbedding: [Number],
+  moodembedding: [Number]
 }, { timestamps: true });
 
 export const User = mongoose.model('User', UserSchema);

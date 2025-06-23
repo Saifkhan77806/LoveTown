@@ -54,10 +54,12 @@ export const useAppState = () => {
     currentUser: mockUser,
     userState: 'matched',
     currentMatch: mockMatch,
-    currentConversation: null,
     freezeEndTime: null,
-    lastMatchFeedback: null,
   });
+
+  const setappstates = (appState : AppState) =>{
+    setAppState(appState)
+  }
 
   const updateUserState = (newState: UserState) => {
     setAppState(prev => ({ ...prev, userState: newState }));
@@ -94,5 +96,6 @@ export const useAppState = () => {
     setMatch,
     unpinMatch,
     startConversation,
+    setappstates
   };
 };

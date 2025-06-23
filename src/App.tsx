@@ -30,11 +30,31 @@ function App() {
     //TODO:-  update data here for onboarding !
 
     const { communicationStyle, interests, personalityType, relationshipGoals, values } = data.compatibility;
-    const { age, bio, email, location } = data.personalInfo;
+    const { age, bio, email, location, mood, gender } = data.personalInfo;
 
-    axios.put("http://localhost:5000/onboard-user", { communicationStyle, interests, personalityType, relationshipGoals, values, age, bio, email, location, photos: user?.imageUrl }).then((res) => {
-      console.log(res.data);
-    }).catch((error) => {
+    axios.put("http://localhost:5000/onboard-user", { communicationStyle, interests, personalityType, relationshipGoals, values, age, bio, email, gender, location, photos: user?.imageUrl, mood }).then((res) => {
+      console.log("onboarding Data", res.data);
+
+      axios.get(`http://localhost:5000/match/${email}`).then((res) => {
+        const result = res.data.results[0];
+
+        console.log("Matched user", result);
+
+        axios.post("http://localhost:5000/create-appstate", { user1: res.data.user1, user2: result?._id, compatibilityScore: result?.matchScore, isPinned: true }).then((res) => {
+          console.log("Matched data is stored in DB", res.data)
+        }).catch((error) => {
+          console.log("Matched data stroing error", error)
+        })
+
+
+
+
+      }).catch((error) => {
+        console.log("During onBoarding setUp:-", error);
+      })
+
+    }
+    ).catch((error) => {
       console.log("During onBoarding setUp:-", error);
     })
 

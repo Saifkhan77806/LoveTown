@@ -39,7 +39,6 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, onStartChat, onUnpinMat
         return (
           <FrozenState 
             freezeEndTime={appState.freezeEndTime!}
-            feedback={appState.lastMatchFeedback}
           />
         );
       case 'chatting':

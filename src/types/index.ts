@@ -51,18 +51,18 @@ export interface AppState {
   currentUser: User | null;
   userState: UserState;
   currentMatch: Match | null;
-  currentConversation: Conversation | null;
-  freezeEndTime: Date | null;
-  lastMatchFeedback: string | null;
+  freezeEndTime?: Date | null;
 }
 
 export interface OnboardingData {
   personalInfo: {
     name: string;
     email: string;
+    gender: 'male' | 'female';
     age: number;
     location: string;
     bio: string;
+    mood: string;
     photos: string[];
   };
   compatibility: {

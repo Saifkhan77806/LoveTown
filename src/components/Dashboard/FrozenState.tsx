@@ -11,7 +11,7 @@ const FrozenState: React.FC<FrozenStateProps> = ({ freezeEndTime, feedback }) =>
 
   useEffect(() => {
     const updateTimer = () => {
-      const now = new Date().getTime();
+      const now = new Date().getTime();3
       const end = freezeEndTime.getTime();
       const difference = end - now;
 

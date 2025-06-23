@@ -20,6 +20,7 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ data, onUpdate, onN
     gender: data.personalInfo?.gender || '',
     location: data.personalInfo?.location || '',
     bio: data.personalInfo?.bio || '',
+    mood: data.personalInfo?.mood || '',
     photos: data.personalInfo?.photos || ['https://images.pexels.com/photos/1239288/pexels-photo-1239288.jpeg']
   });
 
@@ -29,7 +30,7 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ data, onUpdate, onN
     onUpdate({ personalInfo: newData });
   };
 
-  const canProceed = formData.name && formData.age && formData.location && formData.bio && formData.gender;
+  const canProceed = formData.name && formData.age && formData.location && formData.bio && formData.gender && formData.mood;
 
   return (
     <div className="p-6">
@@ -97,7 +98,7 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ data, onUpdate, onN
           <div className='flex gap-2'>
             <input
               type="radio"
-              value={formData.age}
+              value={'male'}
               name='gender'
               id='male'
               onChange={(e) => handleChange('gender', e.target.value || '')}
@@ -110,7 +111,7 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ data, onUpdate, onN
           <div className='flex gap-2'>
             <input
               type="radio"
-              value={formData.age}
+              value={'female'}
               name='gender'
               id='female'
               onChange={(e) => handleChange('gender', e.target.value || '')}
@@ -144,6 +145,19 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ data, onUpdate, onN
             maxLength={500}
           />
           <p className="text-xs text-gray-500 mt-1">{formData.bio.length}/500 characters</p>
+        </div>
+
+         <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Mood</label>
+          <textarea
+            value={formData.mood}
+            onChange={(e) => handleChange('mood', e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+            rows={4}
+            placeholder="Tell Me about your mood , your day, your thoughts..."
+            maxLength={500}
+          />
+          <p className="text-xs text-gray-500 mt-1">{formData.mood.length}/500 characters</p>
         </div>
       </div>
 
