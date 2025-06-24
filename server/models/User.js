@@ -12,6 +12,7 @@ const UserSchema = new mongoose.Schema({
   interests: [String],
   values: [String],
   mood: String,
+  status: { type: String, enum: ['onboarding', 'available', 'matched', 'frozen', 'chatting', 'breakup'], default: 'available' },
   personalityType: String,
   relationshipGoals: String,
   communicationStyle: String,

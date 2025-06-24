@@ -9,7 +9,7 @@ interface ProfileProps {
 
 const Profile: React.FC<ProfileProps> = ({ user }) => {
   const [activeTab, setActiveTab] = useState<'about' | 'preferences' | 'compatibility'>('about');
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-warm-50 to-primary-50 pb-20">

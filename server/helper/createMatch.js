@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getUserByEmail } from "../data/user.js";
 import { User } from "../models/User.js";
 import { Match } from "../models/Match..js";
+import { findMatchByEmail } from "../data/match.js";
 
 const genAI = new GoogleGenerativeAI("AIzaSyBv1hdbmsSlMR-OjS9hBHvFe7jMDdGPO_Y");
 const model = genAI.getGenerativeModel({ model: "embedding-001" });
@@ -48,7 +49,14 @@ export const createMatch = async (email) => {
 
 
         try {
-            const Macthed = new Match({ user1: user?._id, user2: result?._id , compatibilityScore: result?.matchScore, isPinned: true })
+
+            const matchUser = await findMatchByEmail(user?.email);
+            
+            if(matchUser){
+                await Match.findOneAndDelete({user1: user?.email});
+            }
+
+            const Macthed = new Match({ user1: user?.email, user2: result?._id , compatibilityScore: result?.matchScore, isPinned: true, status: "matched" })
             const saved = await Macthed.save();
 
             return { success: true, message: saved,  };
@@ -56,9 +64,6 @@ export const createMatch = async (email) => {
         } catch (error) {
             return { success: false, message: error.message };
         }
-
-        // return { success: true, results, user1: user?._id };
-
 
     } catch (error) {
         return { success: false, message: error.message };

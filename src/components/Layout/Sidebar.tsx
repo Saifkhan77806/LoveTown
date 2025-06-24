@@ -2,6 +2,7 @@ import React from 'react';
 import { Heart, Home, MessageCircle, User, Settings, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SignOutButton, useUser } from '@clerk/clerk-react';
+import { useMatchUser } from '../../store/store';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -17,9 +18,13 @@ const Sidebar: React.FC<SidebarProps> = ({
   userState,
 }) => {
 
-  const {isLoaded, user} = useUser();
-  const email = user?.emailAddresses?.[0]?.emailAddress
-  console.log(user)
+  // const {user} = useUser();
+  // const email = user?.emailAddresses?.[0]?.emailAddress
+
+  const {users} = useMatchUser();
+
+  console.log("user is loaded at sidebar",users)
+
   const navigate = useNavigate();
   const navItems = [
     { id: 'dashboard', icon: Home, label: 'Home', link: "/", enabled: true },
@@ -67,7 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             />
             <div>
               <h3 className="font-medium text-gray-900">Alex hero</h3>
-              <h2 className='font-medium text-gray-900'>{email}</h2>
+              <h2 className='font-medium text-gray-900'></h2>
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${userState === 'matched' ? 'bg-primary-500' :
                   userState === 'chatting' ? 'bg-secondary-500' :
