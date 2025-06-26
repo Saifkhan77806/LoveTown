@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 
 const MatchSchema = new mongoose.Schema({
   user1: { type: String, required: true, unique: true },
-  user2: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  user2: { type: String, required: true, unique: true },
   compatibilityScore: Number,
   matchedAt: { type: Date, default: Date.now },
   isPinned: { type: Boolean, default: false },

@@ -5,13 +5,12 @@ import cors from 'cors';
 import { Server as socketIO } from 'socket.io';
 import { connectDB } from './db.js';
 import { User } from './models/User.js';
-import { getUserByEmail, getUserByEmailwithoutEmbd, getUserByIdWithoutEmbd } from './data/user.js';
+import { getUserByEmail, getUserByEmailwithoutEmbd } from './data/user.js';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Match } from './models/Match..js';
 import { cancelJob, getAllJobs, scheduleJob } from './helper/cronManager.js';
 import { createMatch } from './helper/createMatch.js';
-import { findMatchByEmail } from './data/match.js';
-import { match } from 'assert';
+import { findMatchByEmail, findMatchByEmailOfUser2 } from './data/match.js';
 
 const app = express();
 app.use(cors());
@@ -44,13 +43,11 @@ io.on('connection', (socket) => {
 
   socket.on('register', (userId) => {
     users.set(userId, socket.id);
-    console.log(users)
   });
 
   socket.on('join-room', ({ from, to }) => {
     const roomId = getRoomId(from, to);
     socket.join(roomId);
-    console.log(roomId)
   });
 
   socket.on('send-message', async ({ id, from, to, content, timestamp, type }) => {
@@ -131,6 +128,11 @@ app.get("/match/:email", async (req, res) => {
   const email = req.params.email;
 
   try {
+
+    const isMatched = await findMatchByEmailOfUser2(email)
+
+    if(isMatched) return res.status(200).json({success: false, message: "Matched is already exists"});
+
     const user = await getUserByEmail(email)
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
@@ -217,23 +219,35 @@ app.get('/api/jobs', (req, res) => {
 
 app.get('/match-user/:email', async(req,res)=>{
   const email = req.params.email;
+  let user1;
+  let user2;
+  let matchUserdata;
 
   if(!email) return res.status(404).json({success: false, message: 'Email not found'});
 
   try{
-    const matchUserdata = await findMatchByEmail(email);
+    
+    const isMatched = await findMatchByEmailOfUser2(email);
+
+    
+    if(isMatched){
+      user2 = await getUserByEmailwithoutEmbd(isMatched.user2);
+      user1 = await getUserByEmailwithoutEmbd(isMatched?.user1);
+    }else{
+       matchUserdata = await findMatchByEmail(email);
+    
+      if(!matchUserdata) return res.status(404).json({ success: false, message: 'No match found' });
+       user2 = await getUserByEmailwithoutEmbd(matchUserdata.user2);
+       user1 = await getUserByEmailwithoutEmbd(matchUserdata?.user1);
+    }
   
-    if(!matchUserdata) return res.status(404).json({ success: false, message: 'No match found' });
-  
-    const user1 = await getUserByEmailwithoutEmbd(matchUserdata.user1);
-  
-    const user2 = await getUserByIdWithoutEmbd(matchUserdata.user2)
-  
-    return res.status(200).json({success: false, user1, user2, status: matchUserdata?.status, compatibilityScore: matchUserdata?.compatibilityScore, matchedAt: matchUserdata?.matchedAt })
+    return res.status(200).json({success: true, user1, user2, status: matchUserdata?.status, compatibilityScore: matchUserdata?.compatibilityScore, matchedAt: matchUserdata?.matchedAt })
   }catch(err){
     return res.status(400).json({ success: false, message: err.message });
   }
 })
+
+
 
 
 

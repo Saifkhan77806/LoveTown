@@ -1,44 +1,8 @@
 import { useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { UserContextType } from "../types";
 
-interface User {
-    user1: user1;
-    user2: user1;
-    status: string;
-    compatibilityScore: number;
-    matchedAt: string;
-}
-
-interface user1 {
-    _id: string;
-    name: string;
-    email: string;
-    photos: string[];
-    interests: string[];
-    values: string[];
-    createdAt: string;
-    updatedAt: string;
-    age: number;
-    bio: string;
-    communicationStyle: string;
-    location: string;
-    personalityType: string;
-    relationshipGoals: string;
-    gender: Gender;
-    mood: string;
-    status: string
-}
-
-enum Gender {
-    male,
-    female,
-}
-
-interface UserContextType {
-    users: User | null;
-    loading: boolean;
-}
 
 const UserContext = createContext<UserContextType>({ users: null, loading: true });
 
@@ -50,12 +14,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const { user, isLoaded } = useUser()
 
     useEffect(() => {
-        console.log("start");
         if (!isLoaded || !user) return; // 🛑 Wait until user is loaded
-        console.log("start 2");
 
         const email = user.emailAddresses?.[0]?.emailAddress;
-        console.log(email)
+
         if (!email) {
             setLoading(false);
             return;
@@ -67,7 +29,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
                 axios.get(`http://localhost:5000/match-user/${email}`).then((res) => {
                     setUser(res.data);
-                    console.log("it is from store.tsx useEffect", res.data);
+                    if (res.data?.user2?.email == email) {
+                        setUser({...users,user1: res.data?.user2, user2: res.data?.user1,})
+                    }
+                    console.log("it is from store.tsx useEffect", users);
                 }).catch((err) => {
                     console.log("Something went wrong during loading user data", err);
                     setLoading(false);
@@ -75,12 +40,16 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
                     setLoading(false);
                 }
                 )
+
+
             } catch (err) {
                 console.error(err)
             }
         }
 
         fetchUser(email)
+
+
 
 
     }, [isLoaded, user])

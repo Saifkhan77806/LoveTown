@@ -2,17 +2,20 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Video, Phone, MoreVertical } from 'lucide-react';
 import { Match, Message } from '../../types';
 import { io } from 'socket.io-client';
-import { useParams } from 'react-router-dom';
+import { useMatchUser } from '../../store/store';
 
 interface ChatInterfaceProps {
   match: Match;
   onBack: () => void;
 }
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ match, onBack }) => {
+const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
   const socket = io('http://localhost:5000');
-  const { user1, user2 } = useParams();
   const [messageCount, setMessageCount] = useState(0)
+  const {users} = useMatchUser()
+
+  const user1 = users?.user1?._id
+  const user2 = users?.user2?._id
 
   useEffect(() => {
     socket.emit('register', user1);
@@ -113,12 +116,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ match, onBack }) => {
             ←
           </button>
           <img
-            src={match.user.photos[0]}
-            alt={match.user.name}
+            src={users?.user2?.photos[0]}
+            alt={users?.user2?.name}
             className="w-10 h-10 rounded-full object-cover"
           />
           <div>
-            <h2 className="font-semibold text-gray-900">{match.user.name}</h2>
+            <h2 className="font-semibold text-gray-900">{users?.user2?.name}</h2>
             <p className="text-sm text-green-600">Online now</p>
           </div>
         </div>
@@ -147,8 +150,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ match, onBack }) => {
         </div>
       </div>
       {/* For whom to send the chat enter here */}
-      <input type="text" placeholder='For whom to send the chat enter here. ' className='p-2 w-full border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent my-2 mx-1' onChange={(e) => setWhom(e.target.value)} value={whom} />
-
+     
       {/* Progress Banner */}
       <div className="bg-gradient-to-r from-primary-50 to-secondary-50 p-3 border-b border-gray-100">
         <div className="flex items-center justify-between text-sm mb-2">

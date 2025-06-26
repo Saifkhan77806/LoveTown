@@ -11,6 +11,17 @@ export const findMatchByEmail = async (email) => {
     }
 }
 
+export const findMatchByEmailOfUser2 = async (email) => {
+    try {
+        const match = await Match.findOne({ user2: email });
+        return match
+    } catch (err) {
+        return
+    }
+}
+
+
+
 export const findMatchById = async (id) => {
     try {
         const match = await Match.findById(id);

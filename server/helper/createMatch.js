@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getUserByEmail } from "../data/user.js";
 import { User } from "../models/User.js";
 import { Match } from "../models/Match..js";
-import { findMatchByEmail } from "../data/match.js";
+import { findMatchByEmail, findMatchByEmailOfUser2 } from "../data/match.js";
 
 const genAI = new GoogleGenerativeAI("AIzaSyBv1hdbmsSlMR-OjS9hBHvFe7jMDdGPO_Y");
 const model = genAI.getGenerativeModel({ model: "embedding-001" });
@@ -19,6 +19,13 @@ export const createMatch = async (email) => {
     try {
         const user = await getUserByEmail(email)
         if (!user) return "User not found";
+
+        const isMatched = await findMatchByEmailOfUser2(email)
+
+        if (isMatched) return "Matched is already exists";
+
+
+
 
         const bioEmbedding = await model.embedContent({
             content: { parts: [{ text: user.bio }] },
@@ -51,15 +58,16 @@ export const createMatch = async (email) => {
         try {
 
             const matchUser = await findMatchByEmail(user?.email);
-            
-            if(matchUser){
-                await Match.findOneAndDelete({user1: user?.email});
+
+            if (matchUser) {
+                await Match.findOneAndDelete({ user1: user?.email });
             }
 
-            const Macthed = new Match({ user1: user?.email, user2: result?._id , compatibilityScore: result?.matchScore, isPinned: true, status: "matched" })
+            const Macthed = new Match({ user1: user?.email, user2: result?.email, compatibilityScore: result?.matchScore, isPinned: true, status: "matched" })
             const saved = await Macthed.save();
 
-            return { success: true, message: saved,  };
+
+            return { success: true, message: saved, };
 
         } catch (error) {
             return { success: false, message: error.message };

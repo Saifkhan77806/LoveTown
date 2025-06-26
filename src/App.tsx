@@ -160,7 +160,7 @@ function App() {
             {/* Chat
             In this route you only can access after doing login or register 
             */}
-            <Route path='/chat/:user1/:user2' element={appState.currentMatch ? (
+            <Route path='/chat' element={appState.currentMatch ? (
               <ChatInterface
                 match={appState.currentMatch}
                 onBack={handleBackToDashboard}

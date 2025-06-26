@@ -1,19 +1,4 @@
-export interface User {
-  id: string;
-  name: string;
-  age: number;
-  email: string;
-  bio: string;
-  photos: string[];
-  location: string;
-  interests: string[];
-  values: string[];
-  personalityType: string;
-  relationshipGoals: string;
-  communicationStyle: string;
-  emotionalIntelligence: number;
-  compatibility?: number;
-}
+
 
 export interface Match {
   id: string;
@@ -79,4 +64,43 @@ export interface OnboardingData {
     importantTraits: string[];
   };
 
+}
+
+
+export interface User {
+    user1: user1;
+    user2: user1;
+    status: string;
+    compatibilityScore: number;
+    matchedAt: string;
+}
+
+export interface user1 {
+    _id: string;
+    name: string;
+    email: string;
+    photos: string[];
+    interests: string[];
+    values: string[];
+    createdAt: string;
+    updatedAt: string;
+    age: number;
+    bio: string;
+    communicationStyle: string;
+    location: string;
+    personalityType: string;
+    relationshipGoals: string;
+    gender: Gender;
+    mood: string;
+    status: string
+}
+
+enum Gender {
+    male,
+    female,
+}
+
+export interface UserContextType {
+    users: User | null;
+    loading: boolean;
 }
