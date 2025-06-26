@@ -114,7 +114,7 @@ function App() {
         /> */}
 
       {/* Main Content */}
-      <div className="flex-1 lg:flex lg:flex-col">
+      <div className="flex-1 flex-col lg:flex lg:flex-col">
         {/* Top Header */}
         <TopHeader
           currentView={currentView}

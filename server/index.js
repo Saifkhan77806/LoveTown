@@ -56,6 +56,25 @@ io.on('connection', (socket) => {
     io.to(roomId).emit('receive-message', { id, from, to, content, timestamp, type });
   });
 
+  socket.on('call-user', ({ roomId, offer }) => {
+    socket.to(roomId).emit('call-made', { offer, from: socket.id });
+  });
+
+  // Server-side
+  socket.on('end-call', ({ roomId }) => {
+    socket.to(roomId).emit('end-call');
+  });
+
+
+  socket.on('make-answer', ({ roomId, answer }) => {
+    socket.to(roomId).emit('answer-made', { answer, from: socket.id });
+  });
+
+  socket.on('ice-candidate', ({ roomId, candidate }) => {
+    socket.to(roomId).emit('ice-candidate', { candidate, from: socket.id });
+  });
+
+
   socket.on('disconnect', () => {
     [...users.entries()].forEach(([uid, sid]) => {
       if (sid === socket.id) users.delete(uid);
@@ -131,7 +150,7 @@ app.get("/match/:email", async (req, res) => {
 
     const isMatched = await findMatchByEmailOfUser2(email)
 
-    if(isMatched) return res.status(200).json({success: false, message: "Matched is already exists"});
+    if (isMatched) return res.status(200).json({ success: false, message: "Matched is already exists" });
 
     const user = await getUserByEmail(email)
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
@@ -149,7 +168,7 @@ app.get("/match/:email", async (req, res) => {
     const oppositeGender = user.gender === 'male' ? 'female' : 'male';
     const candidates = await User.find({ gender: oppositeGender, status: "available" });
 
-    if(!candidates) return res.status(404).json({ success: false, message: "No candidates found" });
+    if (!candidates) return res.status(404).json({ success: false, message: "No candidates found" });
 
     const results = candidates.map(candidate => {
       let score = 0;
@@ -194,7 +213,7 @@ app.post('/api/schedule', (req, res) => {
 
   scheduleJob(jobId, date, async () => {
     console.log("data")
-    const result = await createMatch(data)  
+    const result = await createMatch(data)
     // Add DB cleanup or email, etc.
   });
 
@@ -217,32 +236,32 @@ app.get('/api/jobs', (req, res) => {
   res.json({ success: true, jobs });
 });
 
-app.get('/match-user/:email', async(req,res)=>{
+app.get('/match-user/:email', async (req, res) => {
   const email = req.params.email;
   let user1;
   let user2;
   let matchUserdata;
 
-  if(!email) return res.status(404).json({success: false, message: 'Email not found'});
+  if (!email) return res.status(404).json({ success: false, message: 'Email not found' });
 
-  try{
-    
+  try {
+
     const isMatched = await findMatchByEmailOfUser2(email);
 
-    
-    if(isMatched){
+
+    if (isMatched) {
       user2 = await getUserByEmailwithoutEmbd(isMatched.user2);
       user1 = await getUserByEmailwithoutEmbd(isMatched?.user1);
-    }else{
-       matchUserdata = await findMatchByEmail(email);
-    
-      if(!matchUserdata) return res.status(404).json({ success: false, message: 'No match found' });
-       user2 = await getUserByEmailwithoutEmbd(matchUserdata.user2);
-       user1 = await getUserByEmailwithoutEmbd(matchUserdata?.user1);
+    } else {
+      matchUserdata = await findMatchByEmail(email);
+
+      if (!matchUserdata) return res.status(404).json({ success: false, message: 'No match found' });
+      user2 = await getUserByEmailwithoutEmbd(matchUserdata.user2);
+      user1 = await getUserByEmailwithoutEmbd(matchUserdata?.user1);
     }
-  
-    return res.status(200).json({success: true, user1, user2, status: matchUserdata?.status, compatibilityScore: matchUserdata?.compatibilityScore, matchedAt: matchUserdata?.matchedAt })
-  }catch(err){
+
+    return res.status(200).json({ success: true, user1, user2, status: matchUserdata?.status, compatibilityScore: matchUserdata?.compatibilityScore, matchedAt: matchUserdata?.matchedAt })
+  } catch (err) {
     return res.status(400).json({ success: false, message: err.message });
   }
 })
