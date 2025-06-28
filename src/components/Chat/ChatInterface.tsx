@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Video, Phone, MoreVertical, X } from 'lucide-react';
+import { Send, Video, X } from 'lucide-react';
 import { Match, Message } from '../../types';
 import { io } from 'socket.io-client';
 import { useMatchUser } from '../../store/store';
@@ -33,12 +33,15 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
     socket.emit('register', user1);
     socket.emit('join-room', { from: user1, to: user2 });
 
+    let stream : MediaStream
     const setupMediaAndConnection = async () => {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      localStream.current = stream;
-
-      if (localVideo.current) {
-        localVideo.current.srcObject = stream;
+      if(isVideo){
+         stream = await navigator.mediaDevices.getUserMedia({ video: isVideo ? true : false, audio: isVideo ? true : false });
+        localStream.current = stream;
+  
+        if (localVideo.current) {
+          localVideo.current.srcObject = stream;
+        }
       }
 
       const pc = new RTCPeerConnection({
@@ -114,7 +117,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
       socket.off('end-call'); // ✅ Cleanup this too
     };
 
-  }, [user1, user2]);
+  }, [user1, user2, isVideo]);
 
   const startCall = async () => {
     setIsCaller(true);
