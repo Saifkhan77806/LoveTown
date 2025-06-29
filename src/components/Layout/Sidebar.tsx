@@ -2,6 +2,7 @@ import React from 'react';
 import { Heart, Home, MessageCircle, User, Settings, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SignOutButton, useUser } from '@clerk/clerk-react';
+import { useMatchUser } from '../../store/store';
 // import { useMatchUser } from '../../store/store';
 
 interface SidebarProps {
@@ -21,7 +22,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const {user} = useUser();
   const email = user?.emailAddresses?.[0]?.emailAddress
 
-  // const {users} = useMatchUser();
+  const {users} = useMatchUser();
 
   // console.log("user is loaded at sidebar",users)
 
@@ -71,7 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
             />
             <div>
-              <h3 className="font-medium text-gray-900">Alex hero</h3>
+              <h3 className="font-medium text-gray-900">{users?.user1?.name}</h3>
               <h2 className='font-medium text-gray-900'>{email}</h2>
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${userState === 'matched' ? 'bg-primary-500' :

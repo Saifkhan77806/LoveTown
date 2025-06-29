@@ -4,6 +4,7 @@ import AvailableState from './AvailableState';
 import MatchedState from './MatchedState';
 import FrozenState from './FrozenState';
 import ChattingState from './ChattingState';
+import { useMatchUser } from '../../store/store';
 
 interface DashboardProps {
   appState: AppState;
@@ -13,12 +14,11 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ appState, onStartChat, onUnpinMatch }) => {
 
-
-
+  const {users} = useMatchUser()
 
 
   const renderCurrentState = () => {
-    switch (appState.userState) {
+    switch (users?.status) {
       case 'available':
         return <AvailableState />;
       case 'matched':

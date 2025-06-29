@@ -17,8 +17,9 @@ import axios from 'axios';
 import { useUser } from '@clerk/clerk-react';
 
 function App() {
-  const { appState, updateUserState, unpinMatch, startConversation } = useAppState();
+  const { appState, updateUserState, unpinMatch, } = useAppState();
   const { user } = useUser()
+  const email = user?.emailAddresses?.[0]?.emailAddress;
   const navigate = useNavigate()
   const [currentView, setCurrentView] = useState('dashboard');
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -61,19 +62,29 @@ function App() {
 
   const handleStartChat = () => {
     // Create a mock conversation
-    const conversation: Conversation = {
-      id: '1',
-      matchId: appState.currentMatch!.id,
-      messages: [],
-      messageCount: 34,
-      createdAt: new Date(),
-      lastActivity: new Date(),
-      milestoneReached: false,
-      videoCallUnlocked: false,
-    };
+    // const conversation: Conversation = {
+    //   id: '1',
+    //   matchId: appState.currentMatch!.id,
+    //   messages: [],
+    //   messageCount: 34,
+    //   createdAt: new Date(),
+    //   lastActivity: new Date(),
+    //   milestoneReached: false,
+    //   videoCallUnlocked: false,
+    // };
 
-    startConversation(conversation);
-    setCurrentView('chat');
+
+    axios.post(`http://localhost:5000/update-match-status-chatting/${email}`).then((res) => {
+      console.log("Match status updated to chatting", res.data);
+      window.location.reload();
+    }).catch((error) => { 
+      console.log("Error updating match status to chatting", error);
+    })
+
+
+
+    // startConversation(conversation);
+    // setCurrentView('chat');
   };
 
   const handleBackToDashboard = () => {

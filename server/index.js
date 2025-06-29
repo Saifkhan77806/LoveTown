@@ -56,9 +56,13 @@ io.on('connection', (socket) => {
     io.to(roomId).emit('receive-message', { id, from, to, content, timestamp, type });
   });
 
-  socket.on('call-user', ({ roomId, offer }) => {
-    socket.to(roomId).emit('call-made', { offer, from: socket.id });
+  socket.on('call-user', ({ roomId, offer, isIncomingCall }) => {
+    socket.to(roomId).emit('call-made', { offer, from: socket.id, isIncomingCall });
   });
+
+  socket.on('calling', ({offeringCall})=>{
+    socket.to(roomId).emit('inComingCall', {offeringCall})
+  })
 
   // Server-side
   socket.on('end-call', ({ roomId }) => {
@@ -250,18 +254,44 @@ app.get('/match-user/:email', async (req, res) => {
 
 
     if (isMatched) {
-      user2 = await getUserByEmailwithoutEmbd(isMatched.user2);
+      user2 = await getUserByEmailwithoutEmbd(isMatched?.user2);
       user1 = await getUserByEmailwithoutEmbd(isMatched?.user1);
+
+      return res.status(200).json({ success: true, user1, user2, status: isMatched?.status, compatibilityScore: isMatched?.compatibilityScore, matchedAt: isMatched?.matchedAt })
+
+
     } else {
       matchUserdata = await findMatchByEmail(email);
 
       if (!matchUserdata) return res.status(404).json({ success: false, message: 'No match found' });
       user2 = await getUserByEmailwithoutEmbd(matchUserdata.user2);
       user1 = await getUserByEmailwithoutEmbd(matchUserdata?.user1);
+      return res.status(200).json({ success: true, user1, user2, status: matchUserdata?.status, compatibilityScore: matchUserdata?.compatibilityScore, matchedAt: matchUserdata?.matchedAt })
     }
 
-    return res.status(200).json({ success: true, user1, user2, status: matchUserdata?.status, compatibilityScore: matchUserdata?.compatibilityScore, matchedAt: matchUserdata?.matchedAt })
   } catch (err) {
+    return res.status(400).json({ success: false, message: err.message });
+  }
+})
+
+
+app.post("/update-match-status-chatting/:data", async (req, res) => {
+  const  data  = req.params.data;
+
+  try{
+
+    const matchData = await Match.findOneAndUpdate(
+      { user1: data },
+      { status: "chatting" },
+      { new: true }
+    );
+
+    if (!matchData) return res.status(404).json({ success: false, message: "Match not found" });
+
+
+    return res.status(200).json({ success: true, data: matchData, message: "Match status updated to chatting" });
+
+  }catch(err){
     return res.status(400).json({ success: false, message: err.message });
   }
 })

@@ -30,9 +30,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
                 axios.get(`http://localhost:5000/match-user/${email}`).then((res) => {
                     setUser(res.data);
                     if (res.data?.user2?.email == email) {
-                        setUser({...users,user1: res.data?.user2, user2: res.data?.user1,})
+                        setUser({...users,user1: res.data?.user2, user2: res.data?.user1, status: res.data?.status, compatibilityScore: res.data?.compatibilityScore, matchedAt: res.data?.matchedAt})
                     }
-                    console.log("it is from store.tsx useEffect", users);
+                    // console.log("it is from store.tsx useEffect", res.data);
                 }).catch((err) => {
                     console.log("Something went wrong during loading user data", err);
                     setLoading(false);

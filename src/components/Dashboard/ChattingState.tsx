@@ -2,12 +2,13 @@ import React from 'react';
 import { MessageCircle, Video, Clock } from 'lucide-react';
 import { Match } from '../../types';
 import { useNavigate } from 'react-router-dom';
+import VedioInterface from '../Chat/VedioInterface';
 
 interface ChattingStateProps {
   match: Match;
 }
 
-const ChattingState: React.FC<ChattingStateProps> = ({ match }) => {
+const ChattingState: React.FC<ChattingStateProps> = () => {
   const navigate = useNavigate();
   const messageCount = 80; // Mock data
   const hoursLeft = 38; // Mock data
@@ -18,7 +19,7 @@ const ChattingState: React.FC<ChattingStateProps> = ({ match }) => {
       {/* Header */}
       <div className="text-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          Chatting with {match.user.name}
+          Chatting with 
         </h1>
         <p className="text-gray-600">Building a meaningful connection</p>
       </div>
@@ -71,15 +72,9 @@ const ChattingState: React.FC<ChattingStateProps> = ({ match }) => {
           Open Chat
         </button>
         <button 
-          disabled={messageCount < 100}
-          className={`p-4 rounded-xl font-medium shadow-lg transition-all duration-200 flex items-center justify-center gap-2 ${
-            messageCount >= 100 
-              ? 'bg-secondary-600 text-white hover:bg-secondary-700' 
-              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-          }`}
+          className='p-4 rounded-xl font-medium shadow-lg transition-all duration-200 flex items-center justify-center gap-2 bg-secondary-600 text-white hover:bg-secondary-700'
         >
-          <Video size={18} />
-          Video Call
+         <VedioInterface messageCount={messageCount} />
         </button>
       </div>
 
