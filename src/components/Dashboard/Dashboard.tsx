@@ -14,11 +14,19 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ appState, onStartChat, onUnpinMatch }) => {
 
-  const {users} = useMatchUser()
+  const {status} = useMatchUser()
 
 
   const renderCurrentState = () => {
-    switch (users?.status) {
+
+
+    const now = new Date();
+    const dateAfter24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    
+    
+    console.log("date now from 24 hours", dateAfter24Hours)
+
+    switch (status) {
       case 'available':
         return <AvailableState />;
       case 'matched':
@@ -32,7 +40,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, onStartChat, onUnpinMat
       case 'frozen':
         return (
           <FrozenState 
-            freezeEndTime={appState.freezeEndTime!}
+            freezeEndTime={dateAfter24Hours}
           />
         );
       case 'chatting':

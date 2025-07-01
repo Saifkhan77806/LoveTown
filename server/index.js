@@ -274,6 +274,21 @@ app.get('/match-user/:email', async (req, res) => {
   }
 })
 
+app.get("/get-user-status/:email", async (req, res) => {
+  const email = req.params.email;
+
+  try {
+    const user = await getUserByEmailwithoutEmbd(email);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    console.log("status", user.status);
+
+    return res.status(200).json({ success: true, data: user.status });
+  } catch (err) {
+    return res.status(400).json({ success: false, message: err.message });
+  }
+})
+
 
 app.post("/update-match-status-chatting/:data", async (req, res) => {
   const  data  = req.params.data;

@@ -103,4 +103,11 @@ enum Gender {
 export interface UserContextType {
     users: User | null;
     loading: boolean;
+    updateStatus: () => void;
+    status: string | null;
+}
+
+export interface Result {
+  message: string;
+  status: boolean;
 }

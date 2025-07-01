@@ -1,5 +1,6 @@
 import React from 'react';
 import { Bell } from 'lucide-react';
+import { useMatchUser } from '../../store/store';
 
 interface TopHeaderProps {
   currentView: string;
@@ -12,12 +13,16 @@ const TopHeader: React.FC<TopHeaderProps> = ({
   userState,
   showNotifications = true
 }) => {
+
+  const {status} = useMatchUser()
+  console.log("status in top header",status)
+
   const getPageTitle = () => {
     switch (currentView) {
       case 'dashboard':
-        return userState === 'matched' ? 'Your Match' :
-          userState === 'chatting' ? 'Chatting' :
-            userState === 'frozen' ? 'Reflection Time' : 'Lone Town';
+        return status === 'matched' ? 'Your Match' :
+          status === 'chatting' ? 'Chatting' :
+            status === 'frozen' ? 'Reflection Time' : 'Lone Town';
       case 'chat':
         return 'Conversation';
       case 'profile':
@@ -30,7 +35,7 @@ const TopHeader: React.FC<TopHeaderProps> = ({
   };
 
   const getStatusIndicator = () => {
-    switch (userState) {
+    switch (status) {
       case 'matched':
         return (
           <div className="flex items-center gap-2 bg-primary-100 px-3 py-1 rounded-full">

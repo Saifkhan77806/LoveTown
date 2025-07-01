@@ -1,6 +1,6 @@
 import React from 'react';
 import { Heart, Home, MessageCircle, User, Settings, LogOut } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { SignOutButton, useUser } from '@clerk/clerk-react';
 import { useMatchUser } from '../../store/store';
 // import { useMatchUser } from '../../store/store';
@@ -15,12 +15,12 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
   onClose,
-  currentView,
   userState,
 }) => {
 
   const {user} = useUser();
   const email = user?.emailAddresses?.[0]?.emailAddress
+  const location = useLocation()
 
   const {users} = useMatchUser();
 
@@ -91,7 +91,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div className="space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = currentView === item.id;
+              const isActive = location.pathname === item.link;
               const isEnabled = item.enabled;
 
               return (
