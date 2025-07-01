@@ -10,7 +10,6 @@ interface TopHeaderProps {
 
 const TopHeader: React.FC<TopHeaderProps> = ({
   currentView,
-  userState,
   showNotifications = true
 }) => {
 

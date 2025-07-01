@@ -10,7 +10,7 @@ import Onboarding from './components/Onboarding/Onboarding';
 import LoginForm from './components/Auth/LoginForm';
 import RegisterForm from './components/Auth/RegisterForm';
 import ForgotPasswordForm from './components/Auth/ForgotPasswordForm';
-import { OnboardingData, Conversation } from './types';
+import { OnboardingData, } from './types';
 import { Route, Routes, useNavigate } from 'react-router-dom';
 import TestChat from './components/Chat/TestChatBox';
 import axios from 'axios';
@@ -77,6 +77,7 @@ function App() {
     axios.post(`http://localhost:5000/update-match-status-chatting/${email}`).then((res) => {
       console.log("Match status updated to chatting", res.data);
       window.location.reload();
+      
     }).catch((error) => { 
       console.log("Error updating match status to chatting", error);
     })
