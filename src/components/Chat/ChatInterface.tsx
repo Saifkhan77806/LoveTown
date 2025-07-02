@@ -18,7 +18,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
   const user1 = users?.user1?._id;
   const user2 = users?.user2?._id;
 
-  
+
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -48,6 +48,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
   };
 
   useEffect(() => {
+
+    socket.emit('register', user1);
+    socket.emit('join-room', { from: user1, to: user2 });
+
+
     const handler = (msg: Message) => {
       setMessages((prev) => [...prev, { ...msg, timestamp: new Date(msg.timestamp) }]);
       setMessageCount((prev) => prev + 1);
@@ -56,7 +61,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
     return () => {
       socket.off('receive-message', handler);
     };
-  }, []);
+  }, [message]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -65,9 +70,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
   return (
     <div className="flex flex-col h-screen max-lg:h-[76vh] bg-white">
       {/* Video Modal */}
-     
 
-      
+
+
 
       {/* Header */}
       <div className="bg-white border-b p-4 flex items-center justify-between">
@@ -81,7 +86,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
         </div>
         <div className="flex items-center gap-2">
           <VedioInterface messageCount={messageCount} />
-          
+
         </div>
       </div>
 

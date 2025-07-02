@@ -16,7 +16,7 @@ const UserSchema = new mongoose.Schema({
   personalityType: String,
   relationshipGoals: String,
   communicationStyle: String,
-  bioEmbedding: [Number],
+  bioEmbedding: [Number], 
   moodembedding: [Number]
 }, { timestamps: true });
 

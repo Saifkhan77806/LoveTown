@@ -33,9 +33,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
                 const data = res.data;
 
+               
                 setUser(data);
 
-                if (data?.user2?.email === email && users) {
+                if (data?.user2?.email === email) {
                     setUser({
                         ...users,
                         user1: data?.user2,

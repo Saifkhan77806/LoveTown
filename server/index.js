@@ -43,11 +43,13 @@ io.on('connection', (socket) => {
 
   socket.on('register', (userId) => {
     users.set(userId, socket.id);
+    // console.log(`User ${userId} connected with socket ID: ${socket.id}`);
   });
 
   socket.on('join-room', ({ from, to }) => {
     const roomId = getRoomId(from, to);
     socket.join(roomId);
+    // console.log(`User ${from} joined room: ${roomId}`);
   });
 
   socket.on('send-message', async ({ id, from, to, content, timestamp, type }) => {
@@ -281,8 +283,7 @@ app.get("/get-user-status/:email", async (req, res) => {
     const user = await getUserByEmailwithoutEmbd(email);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-    console.log("status", user.status);
-
+    
     return res.status(200).json({ success: true, data: user.status });
   } catch (err) {
     return res.status(400).json({ success: false, message: err.message });

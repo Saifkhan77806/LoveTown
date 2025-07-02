@@ -48,24 +48,16 @@ const mockMatch: Match = {
     'High emotional intelligence scores'
   ]
 };
-const now = new Date();
-const dateAfter24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-
-console.log(dateAfter24Hours); // prints a Date object 24 hours from now
-
-
-console.log(dateAfter24Hours); // prints a Date object 24 hours from now
-console.log("date now from 24 hours", )
 
 export const useAppState = () => {
   const [appState, setAppState] = useState<AppState>({
     currentUser: mockUser,
     userState: 'matched',
     currentMatch: mockMatch,
-    freezeEndTime: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+    freezeEndTime: null,
   });
 
-  const setappstates = (appState : AppState) =>{
+  const setappstates = (appState: AppState) => {
     setAppState(appState)
   }
 
