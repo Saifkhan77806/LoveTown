@@ -1,24 +1,31 @@
-import React, { useState } from 'react';
-import { Eye, EyeOff, Heart, Mail, Lock, User, ArrowRight, Check } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useSignUp } from '@clerk/clerk-react';
-import { Middleware } from "../../../middleware"
-import axios from 'axios';
-
-
+import React, { useState } from "react";
+import {
+  Eye,
+  EyeOff,
+  Heart,
+  Mail,
+  Lock,
+  User,
+  ArrowRight,
+  Check,
+} from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useSignUp } from "@clerk/clerk-react";
+import { Middleware } from "../../../middleware";
+import axios from "axios";
 
 const RegisterForm = () => {
   const { signUp, setActive } = useSignUp();
-  const location = useLocation()
+  const location = useLocation();
 
-  Middleware(location.pathname)
+  Middleware(location.pathname);
 
   const [otp, setOtp] = useState("");
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -32,33 +39,34 @@ const RegisterForm = () => {
     const newErrors: { [key: string]: string } = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = "Name is required";
     } else if (formData.name.trim().length < 2) {
-      newErrors.name = 'Name must be at least 2 characters';
+      newErrors.name = "Name must be at least 2 characters";
     }
 
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
+      newErrors.email = "Please enter a valid email";
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+      newErrors.password = "Password must be at least 8 characters";
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      newErrors.password = 'Password must contain uppercase, lowercase, and number';
+      newErrors.password =
+        "Password must contain uppercase, lowercase, and number";
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
+      newErrors.confirmPassword = "Please confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
     if (!agreedToTerms) {
-      newErrors.terms = 'Please agree to the terms and conditions';
+      newErrors.terms = "Please agree to the terms and conditions";
     }
 
     setErrors(newErrors);
@@ -74,64 +82,65 @@ const RegisterForm = () => {
 
     // Simulate API call
     try {
-
       await signUp?.create({
         username: formData.name,
         emailAddress: formData.email,
-        password: formData.password
-      })
+        password: formData.password,
+      });
 
-      await axios.post("http://localhost:5000/create-user", { name: formData.name, email: formData.email }).then((res) => {
-        console.log(res.data)
-        if (res.status !== 200) return
-      }).catch((err) => {
-        console.log("error during storing data", err)
-        return;
-      })
-      await signUp?.prepareEmailAddressVerification({ strategy: "email_code" })
-      setPendingVerification(true)
+     
+      await signUp?.prepareEmailAddressVerification({ strategy: "email_code" });
+      setPendingVerification(true);
 
       setTimeout(() => {
         setIsLoading(false);
-        console.log(formData)
+        console.log(formData);
       }, 2000);
-
     } catch (error) {
-      alert("some thing went worng")
+      alert("some thing went worng");
       console.log(error);
-      setIsLoading(false)
+      setIsLoading(false);
     }
-
-
-
-
-
-
   };
 
   const handleVerification = async () => {
     if (!signUp || !setActive) return;
 
     try {
-      const result = await signUp.attemptEmailAddressVerification({ code: otp })
-      console.log(result)
+      const result = await signUp.attemptEmailAddressVerification({
+        code: otp,
+      });
+      console.log(result);
 
       if ((await result).status == "complete") {
-        await setActive({ session: (await result).createdSessionId })
-        navigate("/")
+
+         await axios
+        .post("http://localhost:5000/create-user", {
+          name: formData.name,
+          email: formData.email,
+        })
+        .then((res) => {
+          console.log(res.data);
+          if (res.status !== 200) return;
+        })
+        .catch((err) => {
+          console.log("error during storing data", err);
+          return;
+        });
+        
+        await setActive({ session: (await result).createdSessionId });
+        navigate("/");
       }
-
-
     } catch (error) {
       alert("Something went wrong during verification");
-      console.log("verfication error", error)
+      console.log("verfication error", error);
     }
-  }
+  };
 
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
@@ -150,16 +159,16 @@ const RegisterForm = () => {
 
   const getStrengthColor = () => {
     const strength = getPasswordStrength();
-    if (strength <= 2) return 'bg-red-500';
-    if (strength <= 3) return 'bg-yellow-500';
-    return 'bg-green-500';
+    if (strength <= 2) return "bg-red-500";
+    if (strength <= 3) return "bg-yellow-500";
+    return "bg-green-500";
   };
 
   const getStrengthText = () => {
     const strength = getPasswordStrength();
-    if (strength <= 2) return 'Weak';
-    if (strength <= 3) return 'Medium';
-    return 'Strong';
+    if (strength <= 2) return "Weak";
+    if (strength <= 3) return "Medium";
+    return "Strong";
   };
 
   return (
@@ -189,16 +198,19 @@ const RegisterForm = () => {
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => handleChange('name', e.target.value)}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${errors.name
-                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                    : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
-                    }`}
+                  onChange={(e) => handleChange("name", e.target.value)}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${
+                    errors.name
+                      ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-primary-500 focus:border-primary-500"
+                  }`}
                   placeholder="Your full name"
                 />
               </div>
               {errors.name && (
-                <p className="mt-1 text-sm text-red-600 animate-fade-in">{errors.name}</p>
+                <p className="mt-1 text-sm text-red-600 animate-fade-in">
+                  {errors.name}
+                </p>
               )}
             </div>
 
@@ -214,16 +226,19 @@ const RegisterForm = () => {
                 <input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => handleChange('email', e.target.value)}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${errors.email
-                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                    : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
-                    }`}
+                  onChange={(e) => handleChange("email", e.target.value)}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${
+                    errors.email
+                      ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-primary-500 focus:border-primary-500"
+                  }`}
                   placeholder="your@email.com"
                 />
               </div>
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600 animate-fade-in">{errors.email}</p>
+                <p className="mt-1 text-sm text-red-600 animate-fade-in">
+                  {errors.email}
+                </p>
               )}
             </div>
 
@@ -237,13 +252,14 @@ const RegisterForm = () => {
                   <Lock className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   value={formData.password}
-                  onChange={(e) => handleChange('password', e.target.value)}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${errors.password
-                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                    : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
-                    }`}
+                  onChange={(e) => handleChange("password", e.target.value)}
+                  className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${
+                    errors.password
+                      ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-primary-500 focus:border-primary-500"
+                  }`}
                   placeholder="Create a strong password"
                 />
                 <button
@@ -262,16 +278,22 @@ const RegisterForm = () => {
                     <div className="flex-1 bg-gray-200 rounded-full h-2">
                       <div
                         className={`h-2 rounded-full transition-all duration-300 ${getStrengthColor()}`}
-                        style={{ width: `${(getPasswordStrength() / 5) * 100}%` }}
+                        style={{
+                          width: `${(getPasswordStrength() / 5) * 100}%`,
+                        }}
                       ></div>
                     </div>
-                    <span className="text-xs font-medium text-gray-600">{getStrengthText()}</span>
+                    <span className="text-xs font-medium text-gray-600">
+                      {getStrengthText()}
+                    </span>
                   </div>
                 </div>
               )}
 
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600 animate-fade-in">{errors.password}</p>
+                <p className="mt-1 text-sm text-red-600 animate-fade-in">
+                  {errors.password}
+                </p>
               )}
             </div>
 
@@ -285,13 +307,16 @@ const RegisterForm = () => {
                   <Lock className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  type={showConfirmPassword ? 'text' : 'password'}
+                  type={showConfirmPassword ? "text" : "password"}
                   value={formData.confirmPassword}
-                  onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${errors.confirmPassword
-                    ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
-                    : 'border-gray-300 focus:ring-primary-500 focus:border-primary-500'
-                    }`}
+                  onChange={(e) =>
+                    handleChange("confirmPassword", e.target.value)
+                  }
+                  className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 ${
+                    errors.confirmPassword
+                      ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-primary-500 focus:border-primary-500"
+                  }`}
                   placeholder="Confirm your password"
                 />
                 <button
@@ -299,11 +324,17 @@ const RegisterForm = () => {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                 >
-                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showConfirmPassword ? (
+                    <EyeOff size={20} />
+                  ) : (
+                    <Eye size={20} />
+                  )}
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600 animate-fade-in">{errors.confirmPassword}</p>
+                <p className="mt-1 text-sm text-red-600 animate-fade-in">
+                  {errors.confirmPassword}
+                </p>
               )}
             </div>
 
@@ -317,33 +348,47 @@ const RegisterForm = () => {
                     onChange={(e) => {
                       setAgreedToTerms(e.target.checked);
                       if (errors.terms) {
-                        setErrors(prev => ({ ...prev, terms: '' }));
+                        setErrors((prev) => ({ ...prev, terms: "" }));
                       }
                     }}
                     className="sr-only"
                   />
-                  <div className={`w-5 h-5 border-2 rounded transition-all duration-200 ${agreedToTerms
-                    ? 'bg-primary-600 border-primary-600'
-                    : 'border-gray-300 hover:border-primary-400'
-                    }`}>
+                  <div
+                    className={`w-5 h-5 border-2 rounded transition-all duration-200 ${
+                      agreedToTerms
+                        ? "bg-primary-600 border-primary-600"
+                        : "border-gray-300 hover:border-primary-400"
+                    }`}
+                  >
                     {agreedToTerms && (
-                      <Check className="w-3 h-3 text-white m-0.5" strokeWidth={3} />
+                      <Check
+                        className="w-3 h-3 text-white m-0.5"
+                        strokeWidth={3}
+                      />
                     )}
                   </div>
                 </div>
                 <span className="text-sm text-gray-600 leading-relaxed">
-                  I agree to the{' '}
-                  <a href="#" className="text-primary-600 hover:text-primary-700 font-medium">
+                  I agree to the{" "}
+                  <a
+                    href="#"
+                    className="text-primary-600 hover:text-primary-700 font-medium"
+                  >
                     Terms of Service
-                  </a>{' '}
-                  and{' '}
-                  <a href="#" className="text-primary-600 hover:text-primary-700 font-medium">
+                  </a>{" "}
+                  and{" "}
+                  <a
+                    href="#"
+                    className="text-primary-600 hover:text-primary-700 font-medium"
+                  >
                     Privacy Policy
                   </a>
                 </span>
               </label>
               {errors.terms && (
-                <p className="mt-1 text-sm text-red-600 animate-fade-in">{errors.terms}</p>
+                <p className="mt-1 text-sm text-red-600 animate-fade-in">
+                  {errors.terms}
+                </p>
               )}
             </div>
 
@@ -351,10 +396,11 @@ const RegisterForm = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 ${isLoading
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-primary-600 hover:bg-primary-700 shadow-lg hover:shadow-xl'
-                }`}
+              className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 ${
+                isLoading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-primary-600 hover:bg-primary-700 shadow-lg hover:shadow-xl"
+              }`}
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -369,31 +415,30 @@ const RegisterForm = () => {
 
           {/* verfication of email */}
 
-          {
-            pendingVerification &&
-            <div className='my-3'>
+          {pendingVerification && (
+            <div className="my-3">
               <input
                 type="text"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
                 className={`w-full pl-10 pr-12 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-200`}
-                placeholder="Confirm your password"
+                placeholder="Enter OTP here !"
               />
               <button
                 type="submit"
                 onClick={handleVerification}
                 className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 my-3 bg-primary-600 hover:bg-primary-700 shadow-lg hover:shadow-xl'`}
-              >Create Account <ArrowRight size={18} /></button>
+              >
+                Verfiy Account <ArrowRight size={18} />
+              </button>
             </div>
-          }
+          )}
 
           {/* Switch to Login */}
           <div className="mt-6 text-center">
             <p className="text-gray-600">
-              Already have an account?{' '}
-              <button
-                className="text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200"
-              >
+              Already have an account?{" "}
+              <button className="text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200">
                 Sign in
               </button>
             </p>

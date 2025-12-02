@@ -1,9 +1,8 @@
-import React from 'react';
-import { Heart, MapPin, MessageCircle, Pin, Info } from 'lucide-react';
-import { Match } from '../../types';
-import { useMatchUser } from '../../store/store';
-import {Percentage} from '../../../utils/percentage'
-import UnpinDialog from './UnpinDialog';
+import React from "react";
+import { Heart, MapPin, MessageCircle, Pin, Info } from "lucide-react";
+import { Match } from "../../types";
+import { Percentage } from "../../../utils/percentage";
+import UnpinDialog from "./UnpinDialog";
 
 interface MatchedStateProps {
   match: Match;
@@ -12,7 +11,7 @@ interface MatchedStateProps {
 }
 
 const MatchedState: React.FC<MatchedStateProps> = ({ match, onStartChat }) => {
-  const {users} = useMatchUser()
+  const users = {};
 
   return (
     <div className="p-6 pt-12">
@@ -22,18 +21,21 @@ const MatchedState: React.FC<MatchedStateProps> = ({ match, onStartChat }) => {
           <Heart className="text-primary-600" size={16} />
           <span className="text-primary-700 font-medium">Your Daily Match</span>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Meet {users?.user2?.name}</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          Meet {users?.user2?.name || ""}
+        </h1>
         <p className="text-gray-600">
-          {Percentage(Number(users?.compatibilityScore), 5)}% compatibility • Matched today
+          {Percentage(Number(users?.compatibilityScore || 0), 5)}% compatibility •
+          Matched today
         </p>
       </div>
 
       {/* Photo */}
       <div className="relative mb-6">
         <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-gray-200 shadow-lg">
-          <img 
-            src={users?.user2.photos[0]} 
-            alt={users?.user2?.name}
+          <img
+            src={""}
+            alt={users?.user2?.name || ""}
             className="w-full h-full object-cover"
           />
         </div>
@@ -48,38 +50,36 @@ const MatchedState: React.FC<MatchedStateProps> = ({ match, onStartChat }) => {
       <div className="bg-white rounded-xl p-6 mb-6 shadow-sm">
         <div className="mb-4">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            {users?.user2?.name}, {users?.user2?.age}
+            {users?.user2?.name || ""}, {users?.user2?.age || 0}
           </h2>
           <div className="flex items-center text-gray-600 mb-3">
             <MapPin size={16} className="mr-2" />
-            <span>{users?.user2?.location}</span>
-          </div>
-          <p className='font-bold'>Bio</p>
-          <p className="text-gray-700 leading-relaxed">{users?.user2?.bio}</p>
-          <p className='font-bold'>Mood</p>
-          <p className="text-gray-700 leading-relaxed">{users?.user2?.mood}</p>
+            <span>{users?.user2?.location || ""}</span>
+          </div> 
+          <p className="font-bold">Bio</p>
+          <p className="text-gray-700 leading-relaxed">{users?.user2?.bio || ""}</p>
+          <p className="font-bold">Mood</p>
+          <p className="text-gray-700 leading-relaxed">{users?.user2?.mood || ""}</p>
         </div>
 
         {/* Interests */}
         <div className="border-t pt-4">
           <h3 className="font-medium text-gray-900 mb-3">Interests</h3>
           <div className="flex flex-wrap gap-2">
-            {users?.user2?.interests.map((interest, index) => (
-              <span 
+            {/* {users?.user2?.interests.map((interest, index) => (
+              <span
                 key={index}
                 className="bg-secondary-100 text-secondary-700 px-3 py-1 rounded-full text-sm"
               >
                 {interest}
               </span>
-            ))}
+            ))} */}
           </div>
         </div>
       </div>
 
       {/* Compatibility Insights */}
-      <button
-        className="w-full bg-primary-50 border border-primary-200 rounded-xl p-4 mb-6 text-left transition-all duration-200 hover:bg-primary-100"
-      >
+      <button className="w-full bg-primary-50 border border-primary-200 rounded-xl p-4 mb-6 text-left transition-all duration-200 hover:bg-primary-100">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Info className="text-primary-600" size={20} />
@@ -88,7 +88,7 @@ const MatchedState: React.FC<MatchedStateProps> = ({ match, onStartChat }) => {
             </div>
           </div>
           <div className="text-2xl font-bold text-primary-600">
-            {Percentage(Number(users?.compatibilityScore), 5)}%
+            {Percentage(Number(users?.compatibilityScore || 0), 5)}%
           </div>
         </div>
       </button>
@@ -103,10 +103,8 @@ const MatchedState: React.FC<MatchedStateProps> = ({ match, onStartChat }) => {
           Start Conversation
         </button>
 
-            <UnpinDialog />
-       
+        <UnpinDialog />
       </div>
-
     </div>
   );
 };

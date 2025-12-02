@@ -1,11 +1,9 @@
 import { PinOff } from "lucide-react";
 import { useState } from "react";
-import { useMatchUser } from "../../store/store";
 
 
 const UnpinDialog = () => {
     const [showUnpinDialog, setShowUnpinDialog] = useState(false);
-    const { updateStatus } = useMatchUser()
 
     return (
         <>
@@ -29,7 +27,6 @@ const UnpinDialog = () => {
                             <button
                                 onClick={() => {
                                     setShowUnpinDialog(false);
-                                      updateStatus();
                                 }}
                                 className="w-full bg-red-500 text-white py-3 rounded-xl font-medium"
                             >

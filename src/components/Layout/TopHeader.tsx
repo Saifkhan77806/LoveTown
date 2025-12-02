@@ -1,6 +1,5 @@
 import React from 'react';
 import { Bell } from 'lucide-react';
-import { useMatchUser } from '../../store/store';
 
 interface TopHeaderProps {
   currentView: string;
@@ -13,8 +12,7 @@ const TopHeader: React.FC<TopHeaderProps> = ({
   showNotifications = true
 }) => {
 
-  const {status} = useMatchUser()
-  console.log("status in top header",status)
+  let status = "matched"
 
   const getPageTitle = () => {
     switch (currentView) {

@@ -33,7 +33,7 @@ function App() {
     const { communicationStyle, interests, personalityType, relationshipGoals, values } = data.compatibility;
     const { age, bio, email, location, mood, gender } = data.personalInfo;
 
-    axios.put("http://localhost:5000/onboard-user", { communicationStyle, interests, personalityType, relationshipGoals, values, age, bio, email, gender, location, photos: user?.imageUrl, mood }).then((res) => {
+    axios.put("http://localhost:5000/api/onboard-user", { communicationStyle, interests, personalityType, relationshipGoals, values, age, bio, email, gender, location, photos: user?.imageUrl, mood }).then((res) => {
       console.log("onboarding Data", res.data);
 
       axios.post("http://localhost:5000/api/schedule", { jobId: email, data: email }).then((res) => {

@@ -1,5 +1,4 @@
 import {  useEffect, useRef, useState } from 'react'
-import { useMatchUser } from '../../store/store';
 import { io } from 'socket.io-client';
 import { Video, X } from 'lucide-react';
 
@@ -7,7 +6,6 @@ import { Video, X } from 'lucide-react';
 const VedioInterface = ({messageCount} : {messageCount: number}) => {
 
     const socket = useRef(io('http://localhost:5000')).current;
-    const { users } = useMatchUser();
 
     const [isVideo, setIsVideo] = useState(false);
     const [isCaller, setIsCaller] = useState(false);
@@ -17,8 +15,8 @@ const VedioInterface = ({messageCount} : {messageCount: number}) => {
     const peerConnection = useRef<RTCPeerConnection | null>(null);
     const localStream = useRef<MediaStream | null>(null);
 
-    const user1 = users?.user1?._id;
-    const user2 = users?.user2?._id;
+    const user1 = "";
+    const user2 = "";
 
     const getRoomId = (user1: string | undefined, user2: string | undefined) =>
         [user1, user2].sort().join('-');
