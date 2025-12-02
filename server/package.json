@@ -12,10 +12,14 @@
   "license": "ISC",
   "dependencies": {
     "@google/genai": "^1.6.0",
+    "@reduxjs/toolkit": "^2.11.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "mongoose": "^8.16.0",
     "node-cron": "^4.1.1",
-    "socket.io": "^4.8.1"
+    "react-redux": "^9.2.0",
+    "socket.io": "^4.8.1",
+    "zod": "^4.1.13"
   }
 }
