@@ -1,4 +1,23 @@
-
+export interface userType {
+  _id: string;
+  name: string;
+  email: string;
+  photos: string[];
+  interests: string[];
+  values: string[];
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  age: number;
+  bio: string;
+  communicationStyle: string;
+  gender: string;
+  location: string;
+  mood: string;
+  personalityType: string;
+  relationshipGoals: string;
+  
+}
 
 export interface Match {
   id: string;
@@ -6,7 +25,7 @@ export interface Match {
   compatibilityScore: number;
   matchedAt: Date;
   isPinned: boolean;
-  status: 'active' | 'unpinned' | 'expired';
+  status: "active" | "unpinned" | "expired";
   reasonsForMatch: string[];
 }
 
@@ -16,7 +35,7 @@ export interface Message {
   timestamp: Date;
   from: string | undefined;
   to: string | undefined;
-  type: 'text' | 'voice' | 'system';
+  type: "text" | "voice" | "system";
 }
 
 export interface Conversation {
@@ -30,7 +49,12 @@ export interface Conversation {
   videoCallUnlocked: boolean;
 }
 
-export type UserState = 'onboarding' | 'available' | 'matched' | 'frozen' | 'chatting';
+export type UserState =
+  | "onboarding"
+  | "available"
+  | "matched"
+  | "frozen"
+  | "chatting";
 
 export interface AppState {
   currentUser: User | null;
@@ -43,7 +67,7 @@ export interface OnboardingData {
   personalInfo: {
     name: string;
     email: string;
-    gender: 'male' | 'female';
+    gender: "male" | "female";
     age: number;
     location: string;
     bio: string;
@@ -63,48 +87,46 @@ export interface OnboardingData {
     maxDistance: number;
     importantTraits: string[];
   };
-
 }
 
-
 export interface User {
-    user1: user1;
-    user2: user1;
-    status: string;
-    compatibilityScore: number;
-    matchedAt: string;
+  user1: user1;
+  user2: user1;
+  status: string;
+  compatibilityScore: number;
+  matchedAt: string;
 }
 
 export interface user1 {
-    _id: string;
-    name: string;
-    email: string;
-    photos: string[];
-    interests: string[];
-    values: string[];
-    createdAt: string;
-    updatedAt: string;
-    age: number;
-    bio: string;
-    communicationStyle: string;
-    location: string;
-    personalityType: string;
-    relationshipGoals: string;
-    gender: Gender;
-    mood: string;
-    status: string
+  _id: string;
+  name: string;
+  email: string;
+  photos: string[];
+  interests: string[];
+  values: string[];
+  createdAt: string;
+  updatedAt: string;
+  age: number;
+  bio: string;
+  communicationStyle: string;
+  location: string;
+  personalityType: string;
+  relationshipGoals: string;
+  gender: Gender;
+  mood: string;
+  status: string;
 }
 
 enum Gender {
-    male,
-    female,
+  male,
+  female,
 }
 
 export interface UserContextType {
-    users: User | null;
-    loading: boolean;
-    updateStatus: () => void;
-    status: string | null;
+  users: User | null;
+  loading: boolean;
+  updateStatus: () => void;
+  status: string | null;
 }
 
 export interface Result {

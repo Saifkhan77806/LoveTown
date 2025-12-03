@@ -12,10 +12,14 @@ import { createMatch } from "./helper/createMatch.js";
 import { findMatchByEmail, findMatchByEmailOfUser2 } from "./data/match.js";
 import dotenv from "dotenv";
 import onBoardRoutes from "./routes/onboardRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import morgan from "morgan";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(morgan('dev'));
+
 dotenv.config();
 
 const genAI = new GoogleGenerativeAI(process.env.AI_KEY);
@@ -118,6 +122,7 @@ app.post("/create-user", async (req, res) => {
 });
 
 app.use("/api", onBoardRoutes);
+app.use("/user", userRoutes);
 
 // app.put("/onboard-user", async (req, res) => {
 //   const {

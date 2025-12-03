@@ -1,64 +1,89 @@
-import React from 'react';
-import { Bell } from 'lucide-react';
+import React from "react";
+import { Bell } from "lucide-react";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 interface TopHeaderProps {
   currentView: string;
-  userState: string;
+  userState: string | null;
   showNotifications?: boolean;
 }
 
 const TopHeader: React.FC<TopHeaderProps> = ({
   currentView,
-  showNotifications = true
+  showNotifications = true,
+  userState,
 }) => {
+  let status = userState;
 
-  let status = "matched"
+  console.log("status", status);
 
   const getPageTitle = () => {
     switch (currentView) {
-      case 'dashboard':
-        return status === 'matched' ? 'Your Match' :
-          status === 'chatting' ? 'Chatting' :
-            status === 'frozen' ? 'Reflection Time' : 'Lone Town';
-      case 'chat':
-        return 'Conversation';
-      case 'profile':
-        return 'Your Profile';
-      case 'settings':
-        return 'Settings';
+      case "dashboard":
+        return status === "matched"
+          ? "Your Match"
+          : status === "chatting"
+          ? "Chatting"
+          : status === "frozen"
+          ? "Reflection Time"
+          : "Lone Town";
+      case "chat":
+        return "Conversation";
+      case "onboarding":
+        return "We are searching your match";
+      case "profile":
+        return "Your Profile";
+      case "settings":
+        return "Settings";
       default:
-        return 'Lone Town';
+        return "Lone Town";
     }
   };
 
   const getStatusIndicator = () => {
     switch (status) {
-      case 'matched':
+      case "matched":
         return (
           <div className="flex items-center gap-2 bg-primary-100 px-3 py-1 rounded-full">
             <div className="w-2 h-2 bg-primary-500 rounded-full animate-pulse"></div>
-            <span className="text-primary-700 text-sm font-medium">Matched</span>
+            <span className="text-primary-700 text-sm font-medium">
+              Matched
+            </span>
           </div>
         );
-      case 'chatting':
+      case "chatting":
         return (
           <div className="flex items-center gap-2 bg-secondary-100 px-3 py-1 rounded-full">
             <div className="w-2 h-2 bg-secondary-500 rounded-full animate-pulse"></div>
-            <span className="text-secondary-700 text-sm font-medium">Chatting</span>
+            <span className="text-secondary-700 text-sm font-medium">
+              Chatting
+            </span>
           </div>
         );
-      case 'frozen':
+      case "frozen":
         return (
           <div className="flex items-center gap-2 bg-accent-100 px-3 py-1 rounded-full">
             <div className="w-2 h-2 bg-accent-500 rounded-full"></div>
-            <span className="text-accent-700 text-sm font-medium">Reflecting</span>
+            <span className="text-accent-700 text-sm font-medium">
+              Reflecting
+            </span>
           </div>
         );
-      case 'available':
+      case "available":
         return (
           <div className="flex items-center gap-2 bg-warm-100 px-3 py-1 rounded-full">
             <div className="w-2 h-2 bg-warm-500 rounded-full animate-pulse"></div>
             <span className="text-warm-700 text-sm font-medium">Available</span>
+          </div>
+        );
+      case "onboarding":
+        return (
+          <div className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full">
+            <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse"></div>
+            <span className="text-gray-700 text-sm font-medium">
+              Onboarding
+            </span>
           </div>
         );
       default:
@@ -72,11 +97,12 @@ const TopHeader: React.FC<TopHeaderProps> = ({
         <div className="flex items-center justify-between">
           {/* Left side - Logo/Menu */}
           <div className="flex items-center gap-3">
-
             <div>
               <h1 className="font-semibold text-gray-900">{getPageTitle()}</h1>
-              {currentView === 'dashboard' && (
-                <p className="text-xs text-gray-500">Mindful dating, one connection at a time</p>
+              {currentView === "dashboard" && (
+                <p className="text-xs text-gray-500">
+                  Mindful dating, one connection at a time
+                </p>
               )}
             </div>
           </div>

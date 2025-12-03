@@ -16,24 +16,30 @@ import TestChat from "./components/Chat/TestChatBox";
 import axios from "axios";
 import { useUser } from "@clerk/clerk-react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchStatusAsync } from "./slice/statusSlice";
+import { setStatus } from "./slice/statusSlice";
 import { AppDispatch, RootState } from "./store/store";
+import { fetchUserAsync } from "./slice/userSlice";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
   const { appState, updateUserState, unpinMatch } = useAppState();
   const { user } = useUser();
   const { status } = useSelector((state: RootState) => state.status);
-  const email = user?.emailAddresses?.[0]?.emailAddress;
+  const { user: myUser } = useSelector((state: RootState) => state.user);
+
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState("dashboard");
   const [showOnboarding, setShowOnboarding] = useState(false);
 
+  const email = user?.emailAddresses?.[0]?.emailAddress;
+
   useEffect(() => {
-    if (!status) {
-      dispatch(fetchStatusAsync());
-    }
-  }, []);
+    if (email && !myUser) dispatch(fetchUserAsync({ email }));
+  }, [email]);
+
+  useEffect(() => {
+    if (!status) dispatch(setStatus(myUser?.status));
+  }, [myUser]);
 
   const handleOnboardingComplete = async (data: OnboardingData) => {
     console.log("Onboarding completed with data:", data);
@@ -121,7 +127,7 @@ function App() {
           isOpen={true}
           onClose={() => {}}
           currentView={currentView}
-          userState={appState.userState}
+          userState={status}
         />
       </div>
 
@@ -138,7 +144,7 @@ function App() {
       {/* Main Content */}
       <div className="flex-1 flex-col lg:flex lg:flex-col">
         {/* Top Header */}
-        <TopHeader currentView={currentView} userState={appState.userState} />
+        <TopHeader currentView={currentView} userState={status} />
 
         {/* Content Area */}
         <main className="flex-1 pt-16 lg:pt-0">
@@ -167,6 +173,7 @@ function App() {
               element={
                 <Dashboard
                   appState={appState}
+                  status={status}
                   onStartChat={handleStartChat}
                   onUnpinMatch={unpinMatch}
                 />

@@ -7,7 +7,7 @@ interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   currentView: string;
-  userState: string;
+  userState: string | null;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({

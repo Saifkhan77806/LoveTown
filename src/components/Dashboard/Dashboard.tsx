@@ -8,14 +8,15 @@ interface DashboardProps {
   appState: AppState;
   onStartChat: () => void;
   onUnpinMatch: () => void;
+  status: string | null;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
   appState,
   onStartChat,
+  status,
   onUnpinMatch,
 }) => {
-  let status = "matched";
 
   const renderCurrentState = () => {
     const now = new Date();

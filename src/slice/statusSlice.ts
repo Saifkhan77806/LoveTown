@@ -37,7 +37,13 @@ const statusSlice = createSlice({
         state.error = action.error.message as string;
       });
   },
-  reducers: {},
+  reducers: {
+    setStatus(state, action) {
+      state.status = action.payload;
+    },
+  },
 });
+
+export const { setStatus } = statusSlice.actions;
 
 export default statusSlice.reducer;
