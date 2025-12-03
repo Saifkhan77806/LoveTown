@@ -12,7 +12,7 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSignUp } from "@clerk/clerk-react";
 import { Middleware } from "../../../middleware";
-import axios from "axios";
+import { api } from "../../api";
 
 const RegisterForm = () => {
   const { signUp, setActive } = useSignUp();
@@ -88,7 +88,6 @@ const RegisterForm = () => {
         password: formData.password,
       });
 
-     
       await signUp?.prepareEmailAddressVerification({ strategy: "email_code" });
       setPendingVerification(true);
 
@@ -113,21 +112,20 @@ const RegisterForm = () => {
       console.log(result);
 
       if ((await result).status == "complete") {
+        await api
+          .post(`/create-user`, {
+            name: formData.name,
+            email: formData.email,
+          })
+          .then((res) => {
+            console.log(res.data);
+            if (res.status !== 200) return;
+          })
+          .catch((err) => {
+            console.log("error during storing data", err);
+            return;
+          });
 
-         await axios
-        .post("http://localhost:5000/create-user", {
-          name: formData.name,
-          email: formData.email,
-        })
-        .then((res) => {
-          console.log(res.data);
-          if (res.status !== 200) return;
-        })
-        .catch((err) => {
-          console.log("error during storing data", err);
-          return;
-        });
-        
         await setActive({ session: (await result).createdSessionId });
         navigate("/");
       }
