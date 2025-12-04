@@ -1,12 +1,14 @@
-import cron from 'node-cron'
+import cron from "node-cron";
 
-const jobs = new Map(); // Key: jobId, Value: cronTask
+const jobs = new Map();
 
-export function scheduleJob(jobId, date, callback) {
-  const time = dateToCronTime(date);
-  const task = cron.schedule(time, () => {
+export function scheduleJob(jobId, hoursFromNow, callback) {
+  const targetDate = addHoursToNow(hoursFromNow);
+  const cronTime = dateToCronTime(targetDate);
+
+  const task = cron.schedule(cronTime, () => {
     callback();
-    task.stop(); // Auto-cleanup after execution
+    task.stop();
     jobs.delete(jobId);
   });
 
@@ -28,12 +30,18 @@ export function getAllJobs() {
   return Array.from(jobs.keys());
 }
 
+function addHoursToNow(hours) {
+  const date = new Date();
+  date.setHours(date.getHours() + hours);
+  return date;
+}
+
 function dateToCronTime(date) {
   const sec = date.getSeconds();
   const min = date.getMinutes();
   const hour = date.getHours();
   const day = date.getDate();
-  const month = date.getMonth() + 1; // cron months are 1-12
+  const month = date.getMonth() + 1;
 
   return `${sec} ${min} ${hour} ${day} ${month} *`;
 }

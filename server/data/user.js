@@ -13,6 +13,8 @@ export const getUserByEmail = async (email, isEmbedding = false) => {
 
     const user = await query.lean().exec();
 
+    
+
     // console.log("user", user);
 
     if (user) return { user, success: true };

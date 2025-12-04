@@ -1,3 +1,5 @@
+import { getFilteredUsersByEmail } from "../data/match.js";
+import { scheduleJob } from "../helper/cronManager.js";
 import { User } from "../models/User.js";
 
 export const onBoardUser = async (req, res) => {
@@ -21,9 +23,11 @@ export const onBoardUser = async (req, res) => {
     let status = "onboarding";
     let time = 2;
 
-    
-
-    if (isFrozen == "frozen" || isFrozen == "chatting" || isFrozen == "matched") {
+    if (
+      isFrozen == "frozen" ||
+      isFrozen == "chatting" ||
+      isFrozen == "matched"
+    ) {
       status = "frozen";
       time = 24;
     }
@@ -49,12 +53,18 @@ export const onBoardUser = async (req, res) => {
       { new: true }
     );
 
+    // scheduleJob(user._id, 1, );
+
+    await getFilteredUsersByEmail(email);
+
     if (!user)
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
 
-    res.status(200).json({ success: true, data: user });
+    res
+      .status(200)
+      .json({ success: true, data: user, message: "user matched" });
   } catch (err) {
     return res.status(400).json({ success: false, message: err.message });
   }

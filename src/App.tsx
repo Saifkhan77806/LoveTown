@@ -33,6 +33,8 @@ function App() {
 
   const email = user?.emailAddresses?.[0]?.emailAddress;
 
+  console.log("status:- ", status, "myUser:-", myUser);
+
   useEffect(() => {
     if (email && !myUser) dispatch(fetchUserAsync({ email }));
   }, [email]);
@@ -71,18 +73,7 @@ function App() {
       })
       .then((res) => {
         console.log("onboarding Data", res.data);
-
-        axios
-          .post("http://localhost:5000/api/schedule", {
-            jobId: email,
-            data: email,
-          })
-          .then((res) => {
-            console.log("schedule", res.data);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+        dispatch(fetchUserAsync({ email }));
       })
       .catch((error) => {
         console.log("During onBoarding setUp:-", error);
@@ -276,6 +267,7 @@ function App() {
                   appState={appState}
                   onStartChat={handleStartChat}
                   onUnpinMatch={unpinMatch}
+                  status={status}
                 />
               }
             />

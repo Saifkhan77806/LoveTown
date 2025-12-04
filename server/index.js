@@ -6,10 +6,14 @@ import { connectDB } from "./db.js";
 import { User } from "./models/User.js";
 import { getUserByEmail, getUserByEmailwithoutEmbd } from "./data/user.js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { Match } from "./models/Match..js";
+import { Match } from "./models/Match.js";
 import { cancelJob, getAllJobs, scheduleJob } from "./helper/cronManager.js";
 import { createMatch } from "./helper/createMatch.js";
-import { findMatchByEmail, findMatchByEmailOfUser2 } from "./data/match.js";
+import {
+  findMatchByEmail,
+  findMatchByEmailOfUser2,
+  getFilteredUsersByEmail,
+} from "./data/match.js";
 import dotenv from "dotenv";
 import onBoardRoutes from "./routes/onboardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -18,7 +22,7 @@ import morgan from "morgan";
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(morgan('dev'));
+app.use(morgan("dev"));
 
 dotenv.config();
 
@@ -107,12 +111,13 @@ io.on("connection", (socket) => {
 app.post("/create-user", async (req, res) => {
   try {
     const isUser = await getUserByEmail(req.body.email);
-    if (isUser)
+
+    if (isUser.success)
       return res
         .status(400)
         .json({ success: false, data: "User already exits" });
 
-    const user = new User(req.body);
+    const user = new User({ ...req.body, status: "available" });
     const saved = await user.save();
 
     return res.status(201).json({ success: true, data: saved });
@@ -235,6 +240,12 @@ app.get("/api/jobs", (req, res) => {
   const jobs = getAllJobs();
   res.json({ success: true, jobs });
 });
+
+// app.get("/test", async (req, res) => {
+  // const users = await getFilteredUsersByEmail("saifkhan042358@gmail.com");
+
+  // res.status(200).json({ users });
+// });
 
 app.get("/match-user/:email", async (req, res) => {
   const email = req.params.email;
