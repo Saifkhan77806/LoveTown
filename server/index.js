@@ -14,10 +14,11 @@ import {
   findMatchByEmailOfUser2,
   getFilteredUsersByEmail,
 } from "./data/match.js";
+import morgan from "morgan";
 import dotenv from "dotenv";
 import onBoardRoutes from "./routes/onboardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
-import morgan from "morgan";
+import matchedRoutes from "./routes/matchedroutes.js";
 
 const app = express();
 app.use(cors());
@@ -128,6 +129,7 @@ app.post("/create-user", async (req, res) => {
 
 app.use("/api", onBoardRoutes);
 app.use("/user", userRoutes);
+app.use("/matched", matchedRoutes);
 
 // app.put("/onboard-user", async (req, res) => {
 //   const {
@@ -242,9 +244,9 @@ app.get("/api/jobs", (req, res) => {
 });
 
 // app.get("/test", async (req, res) => {
-  // const users = await getFilteredUsersByEmail("saifkhan042358@gmail.com");
+// const users = await getFilteredUsersByEmail("saifkhan042358@gmail.com");
 
-  // res.status(200).json({ users });
+// res.status(200).json({ users });
 // });
 
 app.get("/match-user/:email", async (req, res) => {
