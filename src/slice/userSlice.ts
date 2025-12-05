@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { api } from "../api";
 import { userType } from "../types";
-import { setStatus } from "./statusSlice";
 
 interface initialStateType {
   user: null | userType;

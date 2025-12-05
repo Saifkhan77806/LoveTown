@@ -3,16 +3,20 @@ import PersonalInfoStep from "./PersonalInfoStep";
 import CompatibilityStep from "./CompatibilityStep";
 import PreferencesStep from "./PreferencesStep";
 import WelcomeStep from "./WelcomeStep";
-import { OnboardingData } from "../../types";
-
+import { userType } from "../../types";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 interface OnboardingProps {
-  onComplete: (data: OnboardingData) => void;
+  onComplete: (data: userType | null) => void;
 }
 
 const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [data, setData] = useState<Partial<OnboardingData>>({});
 
+  const { user } = useSelector((state: RootState) => state.user);
+
+  const [data, setData] = useState<userType | null>(user);
+  // console.log("myUser:-", data);
   const steps = [
     { component: WelcomeStep, title: "Welcome to Lone Town" },
     { component: PersonalInfoStep, title: "Tell us about yourself" },
@@ -28,7 +32,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      onComplete(data as OnboardingData);
+      onComplete(data);
     }
   };
 
