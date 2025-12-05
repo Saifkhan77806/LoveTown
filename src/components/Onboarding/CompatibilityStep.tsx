@@ -10,12 +10,12 @@ interface CompatibilityStepProps {
 
 const CompatibilityStep: React.FC<CompatibilityStepProps> = ({ data, onUpdate, onNext, onPrev }) => {
   const [formData, setFormData] = useState({
-    values: data.compatibility?.values || [],
-    interests: data.compatibility?.interests || [],
-    personalityType: data.compatibility?.personalityType || '',
-    relationshipGoals: data.compatibility?.relationshipGoals || '',
-    communicationStyle: data.compatibility?.communicationStyle || '',
-    dealBreakers: data.compatibility?.dealBreakers || []
+    values: data?.values || [],
+    interests: data.interests || [],
+    personalityType: data.personalityType || '',
+    relationshipGoals: data.relationshipGoals || '',
+    communicationStyle: data.communicationStyle || '',
+    dealBreakers: data.dealBreakers || []
   });
 
   const valueOptions = [

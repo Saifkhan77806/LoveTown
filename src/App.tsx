@@ -10,7 +10,7 @@ import Onboarding from "./components/Onboarding/Onboarding";
 import LoginForm from "./components/Auth/LoginForm";
 import RegisterForm from "./components/Auth/RegisterForm";
 import ForgotPasswordForm from "./components/Auth/ForgotPasswordForm";
-import { OnboardingData } from "./types";
+import { OnboardingData, userType } from "./types";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import TestChat from "./components/Chat/TestChatBox";
 import axios from "axios";
@@ -33,7 +33,7 @@ function App() {
 
   const email = user?.emailAddresses?.[0]?.emailAddress;
 
-  console.log("status:- ", status, "myUser:-", myUser);
+  // console.log("status:- ", status, "myUser:-", myUser);
 
   useEffect(() => {
     if (email && !myUser) dispatch(fetchUserAsync({ email }));
@@ -43,7 +43,7 @@ function App() {
     if (!status) dispatch(setStatus(myUser?.status));
   }, [myUser]);
 
-  const handleOnboardingComplete = async (data: OnboardingData) => {
+  const handleOnboardingComplete = async (data: userType) => {
     console.log("Onboarding completed with data:", data);
     //TODO:-  update data here for onboarding !
 
@@ -53,8 +53,8 @@ function App() {
       personalityType,
       relationshipGoals,
       values,
-    } = data.compatibility;
-    const { age, bio, email, location, mood, gender } = data.personalInfo;
+    } = data;
+    const { age, bio, email, location, mood, gender } = data;
 
     axios
       .put("http://localhost:5000/api/onboard-user", {

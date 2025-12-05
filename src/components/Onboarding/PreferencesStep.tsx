@@ -10,7 +10,7 @@ interface PreferencesStepProps {
 
 const PreferencesStep: React.FC<PreferencesStepProps> = ({ data, onUpdate, onNext, onPrev }) => {
   const [formData, setFormData] = useState({
-    ageRange: data.preferences?.ageRange || [22, 35],
+    ageRange: data.preferences?.ageRange || [18, 35],
     maxDistance: data.preferences?.maxDistance || 25,
     importantTraits: data.preferences?.importantTraits || []
   });
