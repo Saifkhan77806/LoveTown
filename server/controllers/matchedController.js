@@ -40,3 +40,26 @@ export const matchedUser = async (req, res) => {
     console.error("matched user error", error);
   }
 };
+
+export const convertChat = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const isMatchedUser = await User.findOne({ email }).select("status email");
+
+    if (isMatchedUser.status === "matched") {
+      const matchEmail = await matchedUserEmail(email);
+
+      await User.updateMany(
+        { email: { $in: [email, matchEmail] } },
+        { $set: { status: "chatting" } }
+      );
+    }
+
+    return res
+      .status(200)
+      .json({ message: "status is updated from matched to chatting" });
+  } catch (error) {
+    return res.status(400).text(error);
+  }
+};

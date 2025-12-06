@@ -7,6 +7,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { AppDispatch } from "../../store/store";
 import { fetchMatchedUserasync } from "../../slice/matchedSlice";
+import { api } from "../../api";
+import { fetchUserAsync } from "../../slice/userSlice";
+import { setStatus } from "../../slice/statusSlice";
 
 interface MatchedStateProps {
   match: Match;
@@ -14,13 +17,24 @@ interface MatchedStateProps {
   onUnpinMatch: () => void;
 }
 
-const MatchedState: React.FC<MatchedStateProps> = ({ match, onStartChat }) => {
-  const {
-    matchedUser: users,
-    error,
-    loading,
-  } = useSelector((state: RootState) => state.matched);
+const MatchedState: React.FC<MatchedStateProps> = ({ match }) => {
+  const { matchedUser: users } = useSelector(
+    (state: RootState) => state.matched
+  );
   const dispatch = useDispatch<AppDispatch>();
+
+  const convertChat = async (email: string | undefined) => {
+    if (!email) return;
+    try {
+      await api.post("/matched/convertchat", { email });
+
+      dispatch(fetchUserAsync({ email }));
+      dispatch(setStatus("chatting"));
+      return;
+    } catch (error) {
+      console.error("chat conversion error");
+    }
+  };
 
   const { user } = useUser();
 
@@ -115,7 +129,7 @@ const MatchedState: React.FC<MatchedStateProps> = ({ match, onStartChat }) => {
       {/* Action Buttons */}
       <div className="space-y-4">
         <button
-          onClick={onStartChat}
+          onClick={() => convertChat(email)}
           className="w-full bg-primary-600 text-white py-4 rounded-xl font-semibold shadow-lg hover:bg-primary-700 transition-all duration-200 flex items-center justify-center gap-2"
         >
           <MessageCircle size={20} />
