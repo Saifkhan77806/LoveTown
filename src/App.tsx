@@ -10,15 +10,15 @@ import Onboarding from "./components/Onboarding/Onboarding";
 import LoginForm from "./components/Auth/LoginForm";
 import RegisterForm from "./components/Auth/RegisterForm";
 import ForgotPasswordForm from "./components/Auth/ForgotPasswordForm";
-import { OnboardingData, userType } from "./types";
+import { userType } from "./types";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import TestChat from "./components/Chat/TestChatBox";
-import axios from "axios";
 import { useUser } from "@clerk/clerk-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setStatus } from "./slice/statusSlice";
 import { AppDispatch, RootState } from "./store/store";
 import { fetchUserAsync } from "./slice/userSlice";
+import { api } from "./api";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -43,9 +43,11 @@ function App() {
     if (!status) dispatch(setStatus(myUser?.status));
   }, [myUser]);
 
-  const handleOnboardingComplete = async (data: userType) => {
+  const handleOnboardingComplete = async (data: userType | null) => {
     console.log("Onboarding completed with data:", data);
     //TODO:-  update data here for onboarding !
+
+    if (!data) return;
 
     const {
       communicationStyle,
@@ -56,8 +58,8 @@ function App() {
     } = data;
     const { age, bio, email, location, mood, gender } = data;
 
-    axios
-      .put("http://localhost:5000/api/onboard-user", {
+    api
+      .put("/api/onboard-user", {
         communicationStyle,
         interests,
         personalityType,
@@ -74,6 +76,7 @@ function App() {
       .then((res) => {
         console.log("onboarding Data", res.data);
         dispatch(fetchUserAsync({ email }));
+        dispatch(setStatus(myUser?.status));
       })
       .catch((error) => {
         console.log("During onBoarding setUp:-", error);

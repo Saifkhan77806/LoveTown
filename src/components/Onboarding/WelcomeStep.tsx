@@ -79,6 +79,7 @@ const WelcomeStep: React.FC<WelcomeStepProps> = ({ onNext }) => {
         <button
           onClick={() => {
             if (status === "matched" || status === "chatting") setIsOpen(true);
+            else onNext();
           }}
           className="w-full bg-primary-600 text-white py-4 rounded-xl font-semibold shadow-lg hover:bg-primary-700 transition-all duration-200"
         >
