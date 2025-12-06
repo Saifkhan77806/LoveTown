@@ -30,6 +30,7 @@ const UserSchema = new mongoose.Schema(
     communicationStyle: String,
     bioEmbedding: [Number],
     moodembedding: [Number],
+    matchesCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

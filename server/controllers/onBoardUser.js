@@ -1,5 +1,6 @@
 import { getFilteredUsersByEmail } from "../data/match.js";
 import { scheduleJob } from "../helper/cronManager.js";
+import { Match } from "../models/Match.js";
 import { User } from "../models/User.js";
 
 export const onBoardUser = async (req, res) => {
@@ -19,9 +20,58 @@ export const onBoardUser = async (req, res) => {
   } = req.body;
 
   try {
-    const isFrozen = await User.findOne({ email }).select("status");
+    const userdata = await User.findOne({ email }).select("status email");
     let status = "onboarding";
     let time = 2;
+    let matchedUserEmail;
+
+    const isFrozen = userdata._doc;
+
+    const mydata = { ...isFrozen };
+
+    console.log("mydata email:-", mydata.email, "status", mydata.status);
+
+    if (mydata.status === "matched" || mydata.status === "chatting") {
+      const matchedUser = await Match.findOne({
+        $or: [{ user1: mydata.email }, { user2: mydata.email }],
+      });
+
+      if (!matchedUser) {
+        return res.status(404).json({
+          message: "matches not found",
+        });
+      }
+      matchedUserEmail =
+        matchedUser.user1 === mydata.email
+          ? matchedUser.user2
+          : matchedUser.user1;
+
+      await User.findOneAndUpdate(
+        { email: matchedUserEmail },
+        {
+          $set: { status: "breakup" },
+          $inc: { matchesCount: 1 },
+        },
+        { new: true }
+      );
+
+      await User.findOneAndUpdate(
+        { email: mydata.email },
+        {
+          $set: { status: "frozen" },
+          $inc: { matchesCount: 1 },
+        },
+        { new: true }
+      );
+
+      await Match.findOneAndDelete({
+        $or: [{ user1: mydata.email }, { user2: mydata.email }],
+      });
+
+      return res.status(200).json({
+        messgae: "now your frozen and your partner broke up!",
+      });
+    }
 
     if (
       isFrozen == "frozen" ||

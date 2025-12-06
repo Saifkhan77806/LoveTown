@@ -11,7 +11,7 @@ interface OnboardingProps {
 }
 
 const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(1);
 
   const { user } = useSelector((state: RootState) => state.user);
 
