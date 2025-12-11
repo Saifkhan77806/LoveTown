@@ -3,6 +3,7 @@ import { Send } from "lucide-react";
 import { Match, Message } from "../../types";
 import { io } from "socket.io-client";
 import VedioInterface from "./VedioInterface";
+import { useAppSelector } from "../../store/hook";
 
 interface ChatInterfaceProps {
   match: Match;
@@ -10,58 +11,100 @@ interface ChatInterfaceProps {
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
-  const socket = useRef(io("http://localhost:5000")).current;
+  const socketRef = useRef(io("http://localhost:5000"));
 
-  const users = {};
+  const { user } = useAppSelector((state) => state.user);
+  const { matchedUser } = useAppSelector((state) => state.matched);
 
-  const [messageCount, setMessageCount] = useState(3);
-  const user1 = "";
-  const user2 = "";
-
+  const [messageCount, setMessageCount] = useState(0);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(true);
+  const user1 = user?.email;
+  const user2 = matchedUser?.email;
+  const [isOnline, setIsOnline] = useState(false);
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      from: user1,
-      to: user2,
-      content: "Hi! I'm excited we matched. What drew you to Lone Town?",
-      timestamp: new Date(),
-      type: "text",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const progress = (messageCount / 100) * 100;
 
   const sendMessage = () => {
     if (!message.trim()) return;
     const newMessage: Message = {
-      id: Date.now().toString(),
+      id: Date.now().toString(), // Temporary ID, will be replaced by DB ID
       from: user1,
       to: user2,
       content: message,
       timestamp: new Date(),
       type: "text",
     };
-    socket.emit("send-message", newMessage);
+    socketRef.current.emit("send-message", newMessage);
     setMessage("");
   };
 
   useEffect(() => {
+    if (!user1 || !user2) return;
+
+    const socket = socketRef.current;
+    
+    // Register this user with their email
     socket.emit("register", user1);
+
+    // Join the chat room
     socket.emit("join-room", { from: user1, to: user2 });
 
-    const handler = (msg: Message) => {
-      setMessages((prev) => [
-        ...prev,
-        { ...msg, timestamp: new Date(msg.timestamp) },
-      ]);
-      setMessageCount((prev) => prev + 1);
+    const handleGetOnline = (online: boolean) => {
+      console.log("Other user online status:", online);
+      setIsOnline(online);
     };
-    socket.on("receive-message", handler);
+
+    const handleMessageHistory = (history: Message[]) => {
+      console.log("Received message history:", history.length, "messages");
+      setMessages(history.map(msg => ({
+        ...msg,
+        timestamp: new Date(msg.timestamp)
+      })));
+      setIsLoadingMessages(false);
+    };
+
+    const handleMessageCount = (count: number) => {
+      console.log("Message count updated:", count);
+      setMessageCount(count);
+    };
+
+    const handleReceiveMessage = (msg: Message) => {
+      console.log("Received new message:", msg);
+      setMessages((prev) => {
+        // Check if message already exists (avoid duplicates)
+        const exists = prev.some(m => m.id === msg.id);
+        if (exists) return prev;
+        
+        return [
+          ...prev,
+          { ...msg, timestamp: new Date(msg.timestamp) },
+        ];
+      });
+    };
+
+    const handleError = (error: { message: string }) => {
+      console.error("Socket error:", error);
+      alert(error.message);
+    };
+
+    socket.on("getonline", handleGetOnline);
+    socket.on("message-history", handleMessageHistory);
+    socket.on("message-count", handleMessageCount);
+    socket.on("receive-message", handleReceiveMessage);
+    socket.on("error", handleError);
+
+    // Cleanup function
     return () => {
-      socket.off("receive-message", handler);
+      console.log("Component unmounting, leaving room");
+      socket.off("getonline", handleGetOnline);
+      socket.off("message-history", handleMessageHistory);
+      socket.off("message-count", handleMessageCount);
+      socket.off("receive-message", handleReceiveMessage);
+      socket.off("error", handleError);
     };
-  }, [message]);
+  }, [user1, user2]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -69,8 +112,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
 
   return (
     <div className="flex flex-col h-screen max-lg:h-[76vh] bg-white">
-      {/* Video Modal */}
-
       {/* Header */}
       <div className="bg-white border-b p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -80,12 +121,17 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
           >
             ←
           </button>
-          {/* <img src={users?.user2?.photos[0]} alt={users?.user2?.name} className="w-10 h-10 rounded-full object-cover" /> */}
           <div>
             <h2 className="font-semibold text-gray-900">
-              {users?.user2?.name || ""}
+              {matchedUser?.name || ""}
             </h2>
-            <p className="text-sm text-green-600">Online</p>
+            <p
+              className={`text-sm ${
+                isOnline ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {isOnline ? "Online" : "Offline"}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -113,29 +159,42 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((msg) => {
-          const isOwn = msg.from === user1;
-          return (
-            <div
-              key={msg.id}
-              className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`max-w-[80%] p-3 rounded-2xl ${
-                  isOwn ? "bg-blue-600 text-white" : "bg-gray-200 text-black"
-                }`}
-              >
-                <p>{msg.content}</p>
-                <p className="text-xs mt-1">
-                  {msg.timestamp.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              </div>
+        {isLoadingMessages ? (
+          <div className="flex justify-center items-center h-full">
+            <div className="text-gray-500">Loading messages...</div>
+          </div>
+        ) : messages.length === 0 ? (
+          <div className="flex justify-center items-center h-full">
+            <div className="text-gray-500 text-center">
+              <p className="text-lg mb-2">No messages yet</p>
+              <p className="text-sm">Start the conversation!</p>
             </div>
-          );
-        })}
+          </div>
+        ) : (
+          messages.map((msg) => {
+            const isOwn = msg.from === user1;
+            return (
+              <div
+                key={msg.id}
+                className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`max-w-[80%] p-3 rounded-2xl ${
+                    isOwn ? "bg-blue-600 text-white" : "bg-gray-200 text-black"
+                  }`}
+                >
+                  <p>{msg.content}</p>
+                  <p className="text-xs mt-1 opacity-70">
+                    {msg.timestamp.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+              </div>
+            );
+          })
+        )}
         <div ref={messagesEndRef} />
       </div>
 
@@ -157,7 +216,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
           />
           <button
             onClick={sendMessage}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            disabled={!message.trim()}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             <Send size={18} />
           </button>

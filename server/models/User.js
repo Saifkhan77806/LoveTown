@@ -1,5 +1,6 @@
 // models/User.ts
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
+import { ref } from "process";
 
 const UserSchema = new mongoose.Schema(
   {
@@ -31,6 +32,14 @@ const UserSchema = new mongoose.Schema(
     bioEmbedding: [Number],
     moodembedding: [Number],
     matchesCount: { type: Number, default: 0 },
+    messages: [
+      {
+        message: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Message",
+        },
+      },
+    ],
   },
   { timestamps: true }
 );

@@ -23,6 +23,7 @@ export const matchedUser = async (req, res) => {
 
     const data = {
       name: matchedUser.name,
+      email: matchedUser.email,
       age: matchedUser.age,
       bio: matchedUser.bio,
       mood: matchedUser.mood,

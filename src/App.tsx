@@ -19,11 +19,14 @@ import { setStatus } from "./slice/statusSlice";
 import { AppDispatch, RootState } from "./store/store";
 import { fetchUserAsync } from "./slice/userSlice";
 import { api } from "./api";
+import { useAppSelector } from "./store/hook";
+import { fetchMatchedUserasync } from "./slice/matchedSlice";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
   const { appState, updateUserState, unpinMatch } = useAppState();
   const { user } = useUser();
+  const { matchedUser } = useAppSelector((state) => state.matched);
   const { status } = useSelector((state: RootState) => state.status);
   const { user: myUser } = useSelector((state: RootState) => state.user);
 
@@ -37,15 +40,16 @@ function App() {
 
   useEffect(() => {
     if (email && !myUser) dispatch(fetchUserAsync({ email }));
+    if (!matchedUser) dispatch(fetchMatchedUserasync(email as string));
   }, [email]);
 
   useEffect(() => {
     if (!status) dispatch(setStatus(myUser?.status));
   }, [myUser]);
 
-  const handleOnboardingComplete = async (data: userType | null) => {
+  const handleOnboardingComplete = async (data: any) => {
     console.log("Onboarding completed with data:", data);
-    //TODO:-  update data here for onboarding !
+    // //TODO:-  update data here for onboarding !
 
     if (!data) return;
 
@@ -55,8 +59,20 @@ function App() {
       personalityType,
       relationshipGoals,
       values,
-    } = data;
-    const { age, bio, email, location, mood, gender } = data;
+    } = data.compatibility;
+    const { age, bio, email, location, mood, gender } = data.personalInfo;
+
+    console.log(
+      "onbord data",
+      {
+        communicationStyle,
+        interests,
+        personalityType,
+        relationshipGoals,
+        values,
+      },
+      { age, bio, email, location, mood, gender }
+    );
 
     api
       .put("/api/onboard-user", {
