@@ -9,7 +9,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Match } from "./models/Match.js";
 import { cancelJob, getAllJobs, scheduleJob } from "./helper/cronManager.js";
 import { createMatch } from "./helper/createMatch.js";
-import messageRoutes from './routes/matchedroutes.js';
+import messageRoutes from "./routes/matchedroutes.js";
 import {
   findMatchByEmail,
   findMatchByEmailOfUser2,
@@ -21,7 +21,6 @@ import onBoardRoutes from "./routes/onboardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import matchedRoutes from "./routes/matchedroutes.js";
 import { Message } from "./models/Message.js";
-
 
 const app = express();
 app.use(cors());
@@ -54,7 +53,6 @@ function getRoomId(user1, user2) {
 }
 
 io.on("connection", (socket) => {
-  
   socket.on("register", (userId) => {
     users.set(userId, socket.id);
     userBySocket.set(socket.id, userId);
@@ -71,11 +69,11 @@ io.on("connection", (socket) => {
       const messages = await Message.find({
         $or: [
           { from, to },
-          { from: to, to: from }
-        ]
+          { from: to, to: from },
+        ],
       })
-      .sort({ timestamp: 1 })
-      .limit(100); // Load last 100 messages
+        .sort({ timestamp: 1 })
+        .limit(100); // Load last 100 messages
 
       // Send message history to the joining user
       socket.emit("message-history", messages);
@@ -84,12 +82,11 @@ io.on("connection", (socket) => {
       const messageCount = await Message.countDocuments({
         $or: [
           { from, to },
-          { from: to, to: from }
-        ]
+          { from: to, to: from },
+        ],
       });
 
       socket.emit("message-count", messageCount);
-
     } catch (error) {
       console.error("Error loading messages:", error);
       socket.emit("error", { message: "Failed to load message history" });
@@ -113,62 +110,64 @@ io.on("connection", (socket) => {
     socket.to(roomId).emit("getonline", online);
   });
 
-  socket.on("send-message", async ({ id, from, to, content, timestamp, type }) => {
-    const roomId = getRoomId(from, to);
+  socket.on(
+    "send-message",
+    async ({ id, from, to, content, timestamp, type }) => {
+      const roomId = getRoomId(from, to);
 
-    try {
-      // Save message to database
-      const newMessage = new Message({
-        from,
-        to,
-        content,
-        timestamp: timestamp || new Date(),
-        type: type || "text"
-      });
+      try {
+        // Save message to database
+        const newMessage = new Message({
+          from,
+          to,
+          content,
+          timestamp: timestamp || new Date(),
+          type: type || "text",
+        });
 
-      const savedMessage = await newMessage.save();
+        const savedMessage = await newMessage.save();
 
-      // Update both users' message references
-      await User.findOneAndUpdate(
-        { email: from },
-        { 
-          $push: { messages: { message: savedMessage._id } },
-        }
-      );
+        // Update both users' message references
+        await User.findOneAndUpdate(
+          { email: from },
+          {
+            $push: { messages: { message: savedMessage._id } },
+          }
+        );
 
-      await User.findOneAndUpdate(
-        { email: to },
-        { 
-          $push: { messages: { message: savedMessage._id } }
-        }
-      );
+        await User.findOneAndUpdate(
+          { email: to },
+          {
+            $push: { messages: { message: savedMessage._id } },
+          }
+        );
 
-      // Get updated message count
-      const messageCount = await Message.countDocuments({
-        $or: [
-          { from, to },
-          { from: to, to: from }
-        ]
-      });
+        // Get updated message count
+        const messageCount = await Message.countDocuments({
+          $or: [
+            { from, to },
+            { from: to, to: from },
+          ],
+        });
 
-      // Emit the message to all users in the room with the database ID
-      io.to(roomId).emit("receive-message", {
-        id: savedMessage._id.toString(),
-        from: savedMessage.from,
-        to: savedMessage.to,
-        content: savedMessage.content,
-        timestamp: savedMessage.timestamp,
-        type: savedMessage.type
-      });
+        // Emit the message to all users in the room with the database ID
+        io.to(roomId).emit("receive-message", {
+          id: savedMessage._id.toString(),
+          from: savedMessage.from,
+          to: savedMessage.to,
+          content: savedMessage.content,
+          timestamp: savedMessage.timestamp,
+          type: savedMessage.type,
+        });
 
-      // Emit updated message count
-      io.to(roomId).emit("message-count", messageCount);
-
-    } catch (error) {
-      console.error("Error saving message:", error);
-      socket.emit("error", { message: "Failed to send message" });
+        // Emit updated message count
+        io.to(roomId).emit("message-count", messageCount);
+      } catch (error) {
+        console.error("Error saving message:", error);
+        socket.emit("error", { message: "Failed to send message" });
+      }
     }
-  });
+  );
 
   socket.on("call-user", ({ roomId, offer, isIncomingCall }) => {
     socket
@@ -194,8 +193,9 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     const userId = userBySocket.get(socket.id);
-    // console.log("User disconnected:", userId, "Socket:", socket.id);
-``
+
+    // console.log("  z \", userId, "Socket:", socket.id);
+    ``;
     if (userId) {
       // Notify all rooms that this user was in that they're now offline
       socket.rooms.forEach((roomId) => {
@@ -304,7 +304,7 @@ const cosineSimilarity = (a, b) => {
   return dot / (magA * magB);
 };
 
-app.use('/api/messages', messageRoutes);
+app.use("/api/messages", messageRoutes);
 
 app.post("/create-appstate", async (req, res) => {
   const { user1, user2, compatibilityScore, isPinned } = req.body;
