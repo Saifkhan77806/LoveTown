@@ -3,7 +3,10 @@ import { Send } from "lucide-react";
 import { Match, Message } from "../../types";
 import { io } from "socket.io-client";
 import VedioInterface from "./VedioInterface";
-import { useAppSelector } from "../../store/hook";
+import { useAppDispatch, useAppSelector } from "../../store/hook";
+import { useSocket } from "../../constant";
+import { useToast } from "../ui/toaster";
+import { setToast } from "../../slice/toastSlice";
 
 interface ChatInterfaceProps {
   match: Match;
@@ -11,8 +14,9 @@ interface ChatInterfaceProps {
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
-  const socketRef = useRef(io("http://localhost:5000"));
-
+  const socketRef = useSocket();
+  const dispatch = useAppDispatch();
+  const toast = useToast();
   const { user } = useAppSelector((state) => state.user);
   const { matchedUser } = useAppSelector((state) => state.matched);
 
@@ -36,15 +40,15 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
       timestamp: new Date(),
       type: "text",
     };
-    socketRef.current.emit("send-message", newMessage);
+    socketRef.emit("send-message", newMessage);
     setMessage("");
   };
 
   useEffect(() => {
     if (!user1 || !user2) return;
 
-    const socket = socketRef.current;
-    
+    const socket = socketRef;
+
     // Register this user with their email
     socket.emit("register", user1);
 
@@ -58,10 +62,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
 
     const handleMessageHistory = (history: Message[]) => {
       console.log("Received message history:", history.length, "messages");
-      setMessages(history.map(msg => ({
-        ...msg,
-        timestamp: new Date(msg.timestamp)
-      })));
+      setMessages(
+        history.map((msg) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp),
+        }))
+      );
       setIsLoadingMessages(false);
     };
 
@@ -72,15 +78,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
 
     const handleReceiveMessage = (msg: Message) => {
       console.log("Received new message:", msg);
+      // toast.success(msg.content);
+      dispatch(setToast(msg.content));
       setMessages((prev) => {
         // Check if message already exists (avoid duplicates)
-        const exists = prev.some(m => m.id === msg.id);
+        const exists = prev.some((m) => m.id === msg.id);
         if (exists) return prev;
-        
-        return [
-          ...prev,
-          { ...msg, timestamp: new Date(msg.timestamp) },
-        ];
+
+        return [...prev, { ...msg, timestamp: new Date(msg.timestamp) }];
       });
     };
 
@@ -171,11 +176,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
             </div>
           </div>
         ) : (
-          messages.map((msg) => {
+          messages.map((msg, index) => {
             const isOwn = msg.from === user1;
             return (
               <div
-                key={msg.id}
+                key={index}
                 className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
               >
                 <div

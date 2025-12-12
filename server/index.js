@@ -38,6 +38,7 @@ const io = new socketIO(server, {
     origin: "http://localhost:5173",
     methods: ["GET", "POST"],
   },
+  transports: ["websocket", "polling"],
 });
 
 // Connect MongoDB
@@ -53,16 +54,34 @@ function getRoomId(user1, user2) {
 }
 
 io.on("connection", (socket) => {
+  // console.log("New socket connection:", socket.id);
+
   socket.on("register", (userId) => {
+    // Remove old socket mapping if exists
+    const oldSocketId = users.get(userId);
+    if (oldSocketId && oldSocketId !== socket.id) {
+      userBySocket.delete(oldSocketId);
+      // console.log("Removed old socket mapping for user:", userId);
+    }
+
+    // Set new mapping
     users.set(userId, socket.id);
     userBySocket.set(socket.id, userId);
-    console.log("User registered:", userId, "Socket:", socket.id);
+    // console.log("User registered:", userId, "Socket:", socket.id);
+
+    // Notify all rooms this user was previously in about their online status
+    // This handles the case where they reconnected
+    socket.rooms.forEach((roomId) => {
+      if (roomId !== socket.id) {
+        socket.to(roomId).emit("getonline", true);
+      }
+    });
   });
 
   socket.on("join-room", async ({ from, to }) => {
     const roomId = getRoomId(from, to);
     socket.join(roomId);
-    console.log(`User ${from} joined room: ${roomId}`);
+    // console.log(`User ${from} joined room: ${roomId}`);
 
     try {
       // Load previous messages from database
@@ -73,12 +92,10 @@ io.on("connection", (socket) => {
         ],
       })
         .sort({ timestamp: 1 })
-        .limit(100); // Load last 100 messages
+        .limit(100);
 
-      // Send message history to the joining user
       socket.emit("message-history", messages);
 
-      // Get message count for this conversation
       const messageCount = await Message.countDocuments({
         $or: [
           { from, to },
@@ -92,17 +109,23 @@ io.on("connection", (socket) => {
       socket.emit("error", { message: "Failed to load message history" });
     }
 
-    // Check if the other user is already in the room
+    // Check if the other user is online (has an active socket)
     const otherUserSocketId = users.get(to);
     const isOtherUserOnline =
-      otherUserSocketId &&
-      io.sockets.sockets.get(otherUserSocketId)?.rooms.has(roomId);
+      otherUserSocketId && io.sockets.sockets.has(otherUserSocketId);
+
+    // console.log(`Checking online status for ${to}: ${isOtherUserOnline}`);
 
     // Notify the joining user about the other user's status
     socket.emit("getonline", isOtherUserOnline || false);
 
-    // Notify the other user that this user is now online
-    socket.to(roomId).emit("getonline", true);
+    // Notify the other user that this user is now online (if they're in the room)
+    if (isOtherUserOnline) {
+      const otherSocket = io.sockets.sockets.get(otherUserSocketId);
+      if (otherSocket && otherSocket.rooms.has(roomId)) {
+        socket.to(roomId).emit("getonline", true);
+      }
+    }
   });
 
   socket.on("isonline", ({ from, to, online }) => {
@@ -116,7 +139,6 @@ io.on("connection", (socket) => {
       const roomId = getRoomId(from, to);
 
       try {
-        // Save message to database
         const newMessage = new Message({
           from,
           to,
@@ -127,7 +149,6 @@ io.on("connection", (socket) => {
 
         const savedMessage = await newMessage.save();
 
-        // Update both users' message references
         await User.findOneAndUpdate(
           { email: from },
           {
@@ -142,7 +163,6 @@ io.on("connection", (socket) => {
           }
         );
 
-        // Get updated message count
         const messageCount = await Message.countDocuments({
           $or: [
             { from, to },
@@ -150,7 +170,6 @@ io.on("connection", (socket) => {
           ],
         });
 
-        // Emit the message to all users in the room with the database ID
         io.to(roomId).emit("receive-message", {
           id: savedMessage._id.toString(),
           from: savedMessage.from,
@@ -160,7 +179,6 @@ io.on("connection", (socket) => {
           type: savedMessage.type,
         });
 
-        // Emit updated message count
         io.to(roomId).emit("message-count", messageCount);
       } catch (error) {
         console.error("Error saving message:", error);
@@ -194,9 +212,15 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     const userId = userBySocket.get(socket.id);
 
-    // console.log("  z \", userId, "Socket:", socket.id);
-    ``;
     if (userId) {
+      // console.log("User disconnected:", userId, "Socket:", socket.id);
+
+      // Only delete if this is still the current socket for this user
+      if (users.get(userId) === socket.id) {
+        users.delete(userId);
+      }
+      userBySocket.delete(socket.id);
+
       // Notify all rooms that this user was in that they're now offline
       socket.rooms.forEach((roomId) => {
         if (roomId !== socket.id) {
@@ -204,9 +228,6 @@ io.on("connection", (socket) => {
           socket.to(roomId).emit("getonline", false);
         }
       });
-
-      userBySocket.delete(socket.id);
-      users.delete(userId);
     }
   });
 });
@@ -443,4 +464,6 @@ app.post("/update-match-status-chatting/:data", async (req, res) => {
   }
 });
 
-server.listen(5000, () => console.log("Server running on port 5000"));
+server.listen(5000, "0.0.0.0", () =>
+  console.log("Server running on port 5000")
+);

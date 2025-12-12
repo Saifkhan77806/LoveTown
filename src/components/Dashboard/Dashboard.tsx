@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { AppState } from "../../types";
 import AvailableState from "./AvailableState";
 import MatchedState from "./MatchedState";
 import FrozenState from "./FrozenState";
 import ChattingState from "./ChattingState";
+import { useAppSelector } from "../../store/hook";
+import { useToast } from "../ui/toaster";
 interface DashboardProps {
   appState: AppState;
   onStartChat: () => void;
@@ -17,12 +19,11 @@ const Dashboard: React.FC<DashboardProps> = ({
   status,
   onUnpinMatch,
 }) => {
-
-  
-
   const renderCurrentState = () => {
     const now = new Date();
     const dateAfter24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    
+   
 
     console.log("date now from 24 hours", dateAfter24Hours);
 
