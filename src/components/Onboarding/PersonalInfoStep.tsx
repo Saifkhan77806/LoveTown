@@ -18,7 +18,7 @@ type FormData = {
   location: string;
   bio: string;
   mood: string;
-  photos: string[]; // array of URL strings
+  photos: string; // array of URL strings
 };
 
 type Errors = Partial<Record<keyof FormData, string>>;
@@ -43,11 +43,9 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
     location: data?.location ?? "",
     bio: data?.bio ?? "",
     mood: data?.mood ?? "",
-    photos: (Array.isArray(data?.photos)
-      ? (data?.photos as string[])
-      : undefined) ?? [
+    photos:
+      user?.imageUrl ||
       "https://images.pexels.com/photos/1239288/pexels-photo-1239288.jpeg",
-    ],
   });
 
   const [errors, setErrors] = useState<Errors>({});
@@ -67,12 +65,11 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
       bio: data?.bio ?? prev.bio,
       mood: data?.mood ?? prev.mood,
       photos:
-        (Array.isArray(data?.photos)
-          ? (data?.photos as string[])
-          : undefined) ?? prev.photos,
+        user?.imageUrl ||
+        "https://images.pexels.com/photos/1239288/pexels-photo-1239288.jpeg",
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, user?.username, user?.emailAddresses]);
+  }, [data]);
 
   // validate function
   const validate = (fd: FormData): Errors => {
@@ -103,8 +100,9 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
       e.mood = `Mood must be at most ${MAX_MOOD} characters.`;
 
     // optional: ensure there's at least one photo url
-    if (!Array.isArray(fd.photos) || fd.photos.length === 0)
-      e.photos = "At least one photo is required.";
+    if (!fd.photos || !fd.photos.toString().trim()) {
+      e.photos = "Profile photo is required.";
+    }
 
     return e;
   };
@@ -167,7 +165,7 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
         <div className="flex justify-center">
           <div className="relative">
             <img
-              src={formData.photos[0]}
+              src={formData.photos}
               alt="Profile preview"
               className="w-24 h-24 rounded-full object-cover border-4 border-gray-200"
             />

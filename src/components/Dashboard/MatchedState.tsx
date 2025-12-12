@@ -41,7 +41,7 @@ const MatchedState: React.FC<MatchedStateProps> = ({ match }) => {
   const email = user?.emailAddresses[0].emailAddress;
 
   useEffect(() => {
-    if (users === null) dispatch(fetchMatchedUserasync(email as string));
+     dispatch(fetchMatchedUserasync(email as string));
   }, [email]);
 
   return (

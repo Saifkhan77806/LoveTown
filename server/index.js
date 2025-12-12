@@ -9,6 +9,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Match } from "./models/Match.js";
 import { cancelJob, getAllJobs, scheduleJob } from "./helper/cronManager.js";
 import { createMatch } from "./helper/createMatch.js";
+import messageRoutes from "./routes/matchedroutes.js";
 import {
   findMatchByEmail,
   findMatchByEmailOfUser2,
@@ -19,6 +20,7 @@ import dotenv from "dotenv";
 import onBoardRoutes from "./routes/onboardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import matchedRoutes from "./routes/matchedroutes.js";
+import { Message } from "./models/Message.js";
 
 const app = express();
 app.use(cors());
@@ -36,13 +38,15 @@ const io = new socketIO(server, {
     origin: "http://localhost:5173",
     methods: ["GET", "POST"],
   },
+  transports: ["websocket", "polling"],
 });
 
 // Connect MongoDB
 connectDB();
 
 // In-memory user mapping
-const users = new Map();
+const users = new Map(); // userId -> socketId
+const userBySocket = new Map(); // socketId -> userId
 
 // Utility to create a consistent room ID
 function getRoomId(user1, user2) {
@@ -50,15 +54,83 @@ function getRoomId(user1, user2) {
 }
 
 io.on("connection", (socket) => {
+  // console.log("New socket connection:", socket.id);
+
   socket.on("register", (userId) => {
+    // Remove old socket mapping if exists
+    const oldSocketId = users.get(userId);
+    if (oldSocketId && oldSocketId !== socket.id) {
+      userBySocket.delete(oldSocketId);
+      // console.log("Removed old socket mapping for user:", userId);
+    }
+
+    // Set new mapping
     users.set(userId, socket.id);
-    // console.log(`User ${userId} connected with socket ID: ${socket.id}`);
+    userBySocket.set(socket.id, userId);
+    // console.log("User registered:", userId, "Socket:", socket.id);
+
+    // Notify all rooms this user was previously in about their online status
+    // This handles the case where they reconnected
+    socket.rooms.forEach((roomId) => {
+      if (roomId !== socket.id) {
+        socket.to(roomId).emit("getonline", true);
+      }
+    });
   });
 
-  socket.on("join-room", ({ from, to }) => {
+  socket.on("join-room", async ({ from, to }) => {
     const roomId = getRoomId(from, to);
     socket.join(roomId);
     // console.log(`User ${from} joined room: ${roomId}`);
+
+    try {
+      // Load previous messages from database
+      const messages = await Message.find({
+        $or: [
+          { from, to },
+          { from: to, to: from },
+        ],
+      })
+        .sort({ timestamp: 1 })
+        .limit(100);
+
+      socket.emit("message-history", messages);
+
+      const messageCount = await Message.countDocuments({
+        $or: [
+          { from, to },
+          { from: to, to: from },
+        ],
+      });
+
+      socket.emit("message-count", messageCount);
+    } catch (error) {
+      console.error("Error loading messages:", error);
+      socket.emit("error", { message: "Failed to load message history" });
+    }
+
+    // Check if the other user is online (has an active socket)
+    const otherUserSocketId = users.get(to);
+    const isOtherUserOnline =
+      otherUserSocketId && io.sockets.sockets.has(otherUserSocketId);
+
+    // console.log(`Checking online status for ${to}: ${isOtherUserOnline}`);
+
+    // Notify the joining user about the other user's status
+    socket.emit("getonline", isOtherUserOnline || false);
+
+    // Notify the other user that this user is now online (if they're in the room)
+    if (isOtherUserOnline) {
+      const otherSocket = io.sockets.sockets.get(otherUserSocketId);
+      if (otherSocket && otherSocket.rooms.has(roomId)) {
+        socket.to(roomId).emit("getonline", true);
+      }
+    }
+  });
+
+  socket.on("isonline", ({ from, to, online }) => {
+    const roomId = getRoomId(from, to);
+    socket.to(roomId).emit("getonline", online);
   });
 
   socket.on(
@@ -66,14 +138,52 @@ io.on("connection", (socket) => {
     async ({ id, from, to, content, timestamp, type }) => {
       const roomId = getRoomId(from, to);
 
-      io.to(roomId).emit("receive-message", {
-        id,
-        from,
-        to,
-        content,
-        timestamp,
-        type,
-      });
+      try {
+        const newMessage = new Message({
+          from,
+          to,
+          content,
+          timestamp: timestamp || new Date(),
+          type: type || "text",
+        });
+
+        const savedMessage = await newMessage.save();
+
+        await User.findOneAndUpdate(
+          { email: from },
+          {
+            $push: { messages: { message: savedMessage._id } },
+          }
+        );
+
+        await User.findOneAndUpdate(
+          { email: to },
+          {
+            $push: { messages: { message: savedMessage._id } },
+          }
+        );
+
+        const messageCount = await Message.countDocuments({
+          $or: [
+            { from, to },
+            { from: to, to: from },
+          ],
+        });
+
+        io.to(roomId).emit("receive-message", {
+          id: savedMessage._id.toString(),
+          from: savedMessage.from,
+          to: savedMessage.to,
+          content: savedMessage.content,
+          timestamp: savedMessage.timestamp,
+          type: savedMessage.type,
+        });
+
+        io.to(roomId).emit("message-count", messageCount);
+      } catch (error) {
+        console.error("Error saving message:", error);
+        socket.emit("error", { message: "Failed to send message" });
+      }
     }
   );
 
@@ -83,11 +193,10 @@ io.on("connection", (socket) => {
       .emit("call-made", { offer, from: socket.id, isIncomingCall });
   });
 
-  socket.on("calling", ({ offeringCall }) => {
+  socket.on("calling", ({ offeringCall, roomId }) => {
     socket.to(roomId).emit("inComingCall", { offeringCall });
   });
 
-  // Server-side
   socket.on("end-call", ({ roomId }) => {
     socket.to(roomId).emit("end-call");
   });
@@ -101,9 +210,25 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    [...users.entries()].forEach(([uid, sid]) => {
-      if (sid === socket.id) users.delete(uid);
-    });
+    const userId = userBySocket.get(socket.id);
+
+    if (userId) {
+      // console.log("User disconnected:", userId, "Socket:", socket.id);
+
+      // Only delete if this is still the current socket for this user
+      if (users.get(userId) === socket.id) {
+        users.delete(userId);
+      }
+      userBySocket.delete(socket.id);
+
+      // Notify all rooms that this user was in that they're now offline
+      socket.rooms.forEach((roomId) => {
+        if (roomId !== socket.id) {
+          console.log(`User ${userId} left room ${roomId}`);
+          socket.to(roomId).emit("getonline", false);
+        }
+      });
+    }
   });
 });
 
@@ -199,6 +324,8 @@ const cosineSimilarity = (a, b) => {
   const magB = Math.sqrt(b.reduce((sum, bi) => sum + bi * bi, 0));
   return dot / (magA * magB);
 };
+
+app.use("/api/messages", messageRoutes);
 
 app.post("/create-appstate", async (req, res) => {
   const { user1, user2, compatibilityScore, isPinned } = req.body;
@@ -337,4 +464,6 @@ app.post("/update-match-status-chatting/:data", async (req, res) => {
   }
 });
 
-server.listen(5000, () => console.log("Server running on port 5000"));
+server.listen(5000, "0.0.0.0", () =>
+  console.log("Server running on port 5000")
+);

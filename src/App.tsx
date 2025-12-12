@@ -10,8 +10,7 @@ import Onboarding from "./components/Onboarding/Onboarding";
 import LoginForm from "./components/Auth/LoginForm";
 import RegisterForm from "./components/Auth/RegisterForm";
 import ForgotPasswordForm from "./components/Auth/ForgotPasswordForm";
-import { userType } from "./types";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { Route, Routes, useNavigate, useLocation } from "react-router-dom";
 import TestChat from "./components/Chat/TestChatBox";
 import { useUser } from "@clerk/clerk-react";
 import { useDispatch, useSelector } from "react-redux";
@@ -19,13 +18,23 @@ import { setStatus } from "./slice/statusSlice";
 import { AppDispatch, RootState } from "./store/store";
 import { fetchUserAsync } from "./slice/userSlice";
 import { api } from "./api";
+import { useAppSelector } from "./store/hook";
+import { fetchMatchedUserasync } from "./slice/matchedSlice";
+import { useSocket } from "./constant";
+import { useToast } from "./components/ui/toaster";
+import { setToast } from "./slice/toastSlice";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
+  const socket = useSocket();
+  const location = useLocation(); // Add useLocation hook
   const { appState, updateUserState, unpinMatch } = useAppState();
   const { user } = useUser();
+  const { matchedUser } = useAppSelector((state) => state.matched);
+  const { toast: toaster } = useAppSelector((state) => state.toast);
   const { status } = useSelector((state: RootState) => state.status);
   const { user: myUser } = useSelector((state: RootState) => state.user);
+  const toast = useToast();
 
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState("dashboard");
@@ -37,15 +46,46 @@ function App() {
 
   useEffect(() => {
     if (email && !myUser) dispatch(fetchUserAsync({ email }));
-  }, [email]);
+    if (!matchedUser && myUser)
+      dispatch(fetchMatchedUserasync(email as string));
+  }, [email, myUser, matchedUser]);
+
+  // useEffect(() => {
+  //   toast.success(`${toaster} from App.tsx`);
+  // }, [toaster]);
+
+  useEffect(() => {
+    if (!email && !matchedUser) return;
+
+    // Register FIRST
+    socket.emit("register", email);
+    socket.emit("join-room", { from: email, to: matchedUser?.email });
+
+    // Then set up listener
+  }, [email, socket, toaster]); // Include email as dependency
+
+  useEffect(() => {
+    const handleReceiveMessage = (data: any) => {
+      console.log("i had recieved message", data.content);
+      dispatch(setToast(data.content));
+      if (data.content !== email && location.pathname !== "/chat")
+        toast.default(`${data.content}`);
+    };
+
+    socket.on("receive-message", handleReceiveMessage);
+
+    return () => {
+      socket.off("receive-message", handleReceiveMessage);
+    };
+  }, [socket, toaster]);
 
   useEffect(() => {
     if (!status) dispatch(setStatus(myUser?.status));
-  }, [myUser]);
+  }, [myUser, matchedUser]);
 
-  const handleOnboardingComplete = async (data: userType | null) => {
+  const handleOnboardingComplete = async (data: any) => {
     console.log("Onboarding completed with data:", data);
-    //TODO:-  update data here for onboarding !
+    // //TODO:-  update data here for onboarding !
 
     if (!data) return;
 
@@ -55,8 +95,20 @@ function App() {
       personalityType,
       relationshipGoals,
       values,
-    } = data;
-    const { age, bio, email, location, mood, gender } = data;
+    } = data.compatibility;
+    const { age, bio, email, location, mood, gender } = data.personalInfo;
+
+    console.log(
+      "onbord data",
+      {
+        communicationStyle,
+        interests,
+        personalityType,
+        relationshipGoals,
+        values,
+      },
+      { age, bio, email, location, mood, gender }
+    );
 
     api
       .put("/api/onboard-user", {

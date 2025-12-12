@@ -25,8 +25,8 @@ export const onBoardUser = async (req, res) => {
     let time = 2;
     let matchedUserEmail;
 
-    const isFrozen = userdata._doc;
-
+    const isFrozen = userdata?._doc;
+console.log("frozen", isFrozen, userdata)
     const mydata = { ...isFrozen };
 
     console.log("mydata email:-", mydata.email, "status", mydata.status);

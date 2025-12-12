@@ -6,6 +6,7 @@ import { getErrorMessage } from "../utils/axiosError";
 export interface MatchedUser {
   name: string;
   age: number;
+  email: string;
   bio: string;
   mood: string;
   interest: string[];
