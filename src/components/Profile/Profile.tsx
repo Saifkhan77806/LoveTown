@@ -1,6 +1,6 @@
 import  { useEffect, useState } from "react";
 import { Camera, MapPin, Heart, Edit, Settings } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAppSelector } from "../../store/hook";
 import { AppDispatch } from "../../store/store";
 import { useDispatch } from "react-redux";
@@ -53,9 +53,9 @@ const Profile = () => {
                 alt={user?.name}
                 className="w-20 h-20 rounded-full object-cover"
               />
-              <button className="absolute -bottom-1 -right-1 w-8 h-8 bg-primary-600 text-white rounded-full flex items-center justify-center shadow-lg">
+              <Link to={"/onboarding-user"} className="absolute -bottom-1 -right-1 w-8 h-8 bg-primary-600 text-white rounded-full flex items-center justify-center shadow-lg">
                 <Camera size={14} />
-              </button>
+              </Link>
             </div>
             <div className="flex-1">
               <h2 className="text-xl font-semibold text-gray-900">
@@ -65,10 +65,10 @@ const Profile = () => {
                 <MapPin size={16} className="mr-1" />
                 <span>{user?.location}</span>
               </div>
-              <button className="flex items-center gap-1 text-primary-600 hover:text-primary-700 font-medium">
+              <Link to={"/onboarding-user"} className="flex items-center gap-1 text-primary-600 hover:text-primary-700 font-medium">
                 <Edit size={14} />
                 Edit profile
-              </button>
+              </Link>
             </div>
           </div>
 
