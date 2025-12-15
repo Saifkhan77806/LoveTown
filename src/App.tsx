@@ -46,7 +46,11 @@ function App() {
 
   useEffect(() => {
     if (email && !myUser) dispatch(fetchUserAsync({ email }));
-    if (!matchedUser && myUser)
+    if (
+      !matchedUser &&
+      myUser &&
+      (myUser.status === "matched" || myUser.status === "chatting")
+    )
       dispatch(fetchMatchedUserasync(email as string));
   }, [email, myUser, matchedUser]);
 
@@ -250,11 +254,7 @@ function App() {
             */}
             <Route
               path="/profile"
-              element={
-                appState.currentUser ? (
-                  <Profile user={appState.currentUser} />
-                ) : null
-              }
+              element={myUser ? <Profile user={myUser} /> : null}
             />
 
             {/* Settings

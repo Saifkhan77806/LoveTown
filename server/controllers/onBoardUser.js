@@ -55,6 +55,10 @@ export const onBoardUser = async (req, res) => {
         { new: true }
       );
 
+      scheduleJob(user._id, 1, async () => {
+      await getFilteredUsersByEmail(matchedUserEmail);
+    });
+
       await User.findOneAndUpdate(
         { email: mydata.email },
         {

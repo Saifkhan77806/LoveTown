@@ -2,7 +2,7 @@ export interface userType {
   _id: string;
   name: string;
   email: string;
-  photos: string[];
+  photos: string;
   interests: string[];
   values: string[];
   status: string;
@@ -15,8 +15,8 @@ export interface userType {
   location: string;
   mood: string;
   personalityType: string;
+  matchesCount: number;
   relationshipGoals: string;
-  
 }
 
 export interface Match {
