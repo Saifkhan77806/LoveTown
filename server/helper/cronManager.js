@@ -3,9 +3,10 @@ import cron from "node-cron";
 const jobs = new Map();
 
 export function scheduleJob(jobId, hoursFromNow, callback) {
-  const targetDate = addHoursToNow(hoursFromNow);
+  const targetDate = getTargetDate(hoursFromNow);
   const cronTime = dateToCronTime(targetDate);
 
+  console.log("cron job is scheduled");
   const task = cron.schedule(cronTime, () => {
     callback();
     task.stop();
@@ -30,12 +31,28 @@ export function getAllJobs() {
   return Array.from(jobs.keys());
 }
 
-function addHoursToNow(hours) {
+/* ───────────────────────────────
+   ENV-AWARE DATE GENERATION
+   ─────────────────────────────── */
+function getTargetDate(hoursFromNow) {
   const date = new Date();
-  date.setHours(date.getHours() + hours);
-  return date;
+
+  if (process.env.ENVIRONMENT === "PRODUCTION") {
+    // Use hours in prod
+    date.setHours(date.getHours() + hoursFromNow);
+    console.log("it will execute after an hour or hours");
+  } else {
+    // Use minutes in dev (1 hour = 1 minute)
+    date.setMinutes(date.getMinutes() + hoursFromNow);
+    console.log("it will execute after an minute or minute");
+  }
+
+  return new Date(date.getTime() + 60 * 1000); // +1 minute buffer
 }
 
+/* ───────────────────────────────
+   CRON TIME GENERATION
+   ─────────────────────────────── */
 function dateToCronTime(date) {
   const sec = date.getSeconds();
   const min = date.getMinutes();

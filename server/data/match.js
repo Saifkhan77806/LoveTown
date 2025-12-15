@@ -31,7 +31,7 @@ export const findMatchById = async (id) => {
 
 export async function getFilteredUsersByEmail(email) {
   const allowedStatuses = ["available", "onboarding", "breakup"];
-
+  console.log("my match function is executed successfully");
   try {
     // 1. Find the current user
     const currentUser = await User.findOne({ email });
@@ -80,7 +80,7 @@ export async function getFilteredUsersByEmail(email) {
 
     await User.updateMany(
       { email: { $in: [user1, user2] } },
-      { $set: { status: "matched" } }
+      { $set: { status: "matched", messages: [] } }
     );
 
     // console.log("Matched data", {

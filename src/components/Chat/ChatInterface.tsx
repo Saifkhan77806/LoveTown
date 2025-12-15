@@ -116,7 +116,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
   }, [messages]);
 
   return (
-    <div className="flex flex-col h-screen max-lg:h-[76vh] bg-white">
+    <div className="flex flex-col h-screen max-lg:h-[76vh] lg:pt-14 bg-white">
       {/* Header */}
       <div className="bg-white border-b p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
