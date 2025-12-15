@@ -26,7 +26,7 @@ export const onBoardUser = async (req, res) => {
     let matchedUserEmail;
 
     const isFrozen = userdata?._doc;
-console.log("frozen", isFrozen, userdata)
+    console.log("frozen", isFrozen, userdata);
     const mydata = { ...isFrozen };
 
     console.log("mydata email:-", mydata.email, "status", mydata.status);
@@ -74,9 +74,9 @@ console.log("frozen", isFrozen, userdata)
     }
 
     if (
-      isFrozen == "frozen" ||
-      isFrozen == "chatting" ||
-      isFrozen == "matched"
+      mydata.status == "frozen" ||
+      mydata.status == "chatting" ||
+      mydata.status == "matched"
     ) {
       status = "frozen";
       time = 24;
@@ -105,7 +105,9 @@ console.log("frozen", isFrozen, userdata)
 
     // scheduleJob(user._id, 1, );
 
-    await getFilteredUsersByEmail(email);
+    scheduleJob(user._id, 1, async () => {
+      await getFilteredUsersByEmail(email);
+    });
 
     if (!user)
       return res
