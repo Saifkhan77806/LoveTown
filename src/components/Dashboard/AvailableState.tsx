@@ -1,5 +1,10 @@
-import React from 'react';
-import { Sparkles, Clock, Heart } from 'lucide-react';
+import React from "react";
+import {
+  Sparkles,
+  Heart,
+  MessageCircleHeartIcon,
+} from "lucide-react";
+import { Link } from "react-router-dom";
 
 const AvailableState: React.FC = () => {
   return (
@@ -8,9 +13,13 @@ const AvailableState: React.FC = () => {
       <div className="text-center mb-8">
         <div className="inline-flex items-center gap-2 bg-secondary-100 px-4 py-2 rounded-full mb-4">
           <Sparkles className="text-secondary-600" size={16} />
-          <span className="text-secondary-700 font-medium">Ready to Connect</span>
+          <span className="text-secondary-700 font-medium">
+            Ready to Connect
+          </span>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Your next match is coming</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          Your next match is coming
+        </h1>
         <p className="text-gray-600">
           We're carefully selecting someone special for you
         </p>
@@ -26,24 +35,36 @@ const AvailableState: React.FC = () => {
             Quality over quantity
           </h2>
           <p className="text-gray-600 leading-relaxed">
-            We believe in meaningful connections. Your daily match is chosen based on deep compatibility, 
-            shared values, and genuine potential for a lasting relationship.
+            We believe in meaningful connections. Your daily match is chosen
+            based on deep compatibility, shared values, and genuine potential
+            for a lasting relationship.
           </p>
         </div>
 
         {/* Timer */}
-        <div className="bg-gradient-to-r from-primary-50 to-secondary-50 rounded-xl p-4 text-center">
+        <div className="bg-gradient-to-r from-primary-50 to-secondary-50 rounded-xl p-4 text-center space-y-5">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <Clock className="text-primary-600" size={20} />
-            <span className="font-medium text-primary-900">Next match in</span>
+            <MessageCircleHeartIcon className="text-primary-600" size={20} />
+            <span className="font-medium text-primary-900">
+              Go and update your Profile to get match within 3 hours
+            </span>
           </div>
-          <div className="text-2xl font-bold text-primary-600">2h 34m</div>
+          <div>
+            <Link
+              to={"/onboarding-user"}
+              className="text-xl py-3 px-2 font-bold text-white my-5 rounded-md bg-primary-600"
+            >
+              Onboard user
+            </Link>
+          </div>
         </div>
       </div>
 
       {/* How it Works */}
       <div className="bg-white rounded-xl p-6 shadow-sm">
-        <h3 className="font-semibold text-gray-900 mb-4">How Lone Town works</h3>
+        <h3 className="font-semibold text-gray-900 mb-4">
+          How Lone Town works
+        </h3>
         <div className="space-y-4">
           <div className="flex items-start gap-3">
             <div className="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -51,7 +72,9 @@ const AvailableState: React.FC = () => {
             </div>
             <div>
               <h4 className="font-medium text-gray-900">One match per day</h4>
-              <p className="text-sm text-gray-600">Carefully selected based on deep compatibility</p>
+              <p className="text-sm text-gray-600">
+                Carefully selected based on deep compatibility
+              </p>
             </div>
           </div>
           <div className="flex items-start gap-3">
@@ -59,8 +82,12 @@ const AvailableState: React.FC = () => {
               <span className="text-primary-600 text-sm font-bold">2</span>
             </div>
             <div>
-              <h4 className="font-medium text-gray-900">Exclusive connection</h4>
-              <p className="text-sm text-gray-600">Focus on one person at a time for meaningful conversations</p>
+              <h4 className="font-medium text-gray-900">
+                Exclusive connection
+              </h4>
+              <p className="text-sm text-gray-600">
+                Focus on one person at a time for meaningful conversations
+              </p>
             </div>
           </div>
           <div className="flex items-start gap-3">
@@ -69,7 +96,9 @@ const AvailableState: React.FC = () => {
             </div>
             <div>
               <h4 className="font-medium text-gray-900">Milestone unlocks</h4>
-              <p className="text-sm text-gray-600">Video calls unlock after 100 messages in 48 hours</p>
+              <p className="text-sm text-gray-600">
+                Video calls unlock after 100 messages in 48 hours
+              </p>
             </div>
           </div>
         </div>

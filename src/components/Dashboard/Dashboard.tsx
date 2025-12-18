@@ -5,7 +5,7 @@ import MatchedState from "./MatchedState";
 import FrozenState from "./FrozenState";
 import ChattingState from "./ChattingState";
 import { useAppSelector } from "../../store/hook";
-import { useToast } from "../ui/toaster";
+import OnboardingState from "./OnboardState";
 interface DashboardProps {
   appState: AppState;
   onStartChat: () => void;
@@ -20,10 +20,10 @@ const Dashboard: React.FC<DashboardProps> = ({
   onUnpinMatch,
 }) => {
   const renderCurrentState = () => {
-    const now = new Date();
-    const dateAfter24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-    
    
+    const { user } = useAppSelector((state) => state.user);
+
+    const dateAfter24Hours = new Date(user?.freezeTime);
 
     console.log("date now from 24 hours", dateAfter24Hours);
 
@@ -42,6 +42,8 @@ const Dashboard: React.FC<DashboardProps> = ({
         return <FrozenState freezeEndTime={dateAfter24Hours} />;
       case "chatting":
         return <ChattingState match={appState.currentMatch!} />;
+      case "onboarding":
+        return <OnboardingState freezeEndTime={dateAfter24Hours} />;
       default:
         return <AvailableState />;
     }

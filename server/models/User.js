@@ -32,6 +32,7 @@ const UserSchema = new mongoose.Schema(
     bioEmbedding: [Number],
     moodembedding: [Number],
     matchesCount: { type: Number, default: 0 },
+    freezeTime: Date,
     messages: [
       {
         message: {

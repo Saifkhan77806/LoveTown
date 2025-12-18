@@ -23,6 +23,7 @@ import { fetchMatchedUserasync } from "./slice/matchedSlice";
 import { useSocket } from "./constant";
 import { useToast } from "./components/ui/toaster";
 import { setToast } from "./slice/toastSlice";
+import { AxiosAuthProvider } from "./store/AxiosAuthProvider";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -170,19 +171,21 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 lg:flex">
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:block lg:w-80 lg:flex-shrink-0">
-        <Sidebar
-          isOpen={true}
-          onClose={() => {}}
-          currentView={currentView}
-          userState={status}
-        />
-      </div>
+    <>
+      <AxiosAuthProvider />
+      <div className="min-h-screen bg-gray-50 lg:flex">
+        {/* Desktop Sidebar */}
+        <div className="hidden lg:block lg:w-80 lg:flex-shrink-0">
+          <Sidebar
+            isOpen={true}
+            onClose={() => {}}
+            currentView={currentView}
+            userState={status}
+          />
+        </div>
 
-      {/* Mobile Sidebar */}
-      {/* <Sidebar
+        {/* Mobile Sidebar */}
+        {/* <Sidebar
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
           currentView={currentView}
@@ -191,157 +194,155 @@ function App() {
           onSignOut={handleSignOut}
         /> */}
 
-      {/* Main Content */}
-      <div className="flex-1 flex-col lg:flex lg:flex-col">
-        {/* Top Header */}
-        <TopHeader currentView={currentView} userState={status} />
+        {/* Main Content */}
+        <div className="flex-1 flex-col lg:flex lg:flex-col">
+          {/* Top Header */}
+          <TopHeader currentView={currentView} userState={status} />
 
-        {/* Content Area */}
-        <main className="flex-1 pt-16 lg:pt-0">
-          {/* {renderCurrentView()} */}
-          <Routes>
-            {/* Register 
+          {/* Content Area */}
+          <main className="flex-1 pt-16 lg:pt-0">
+            {/* {renderCurrentView()} */}
+            <Routes>
+              {/* Register 
             In this route after register you will not redirected to this page until and unless after doing logout
             */}
-            <Route path="/register" element={<RegisterForm />} />
+              <Route path="/register" element={<RegisterForm />} />
 
-            {/* Login
+              {/* Login
             In this route after login you will you redirected to this page until and unless after doing logout
             */}
-            <Route path="/login" element={<LoginForm />} />
+              <Route path="/login" element={<LoginForm />} />
 
-            {/* Forgot-password
+              {/* Forgot-password
             In this route after login or register you will you redirected to this page until and unless after doing logout
             */}
-            <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+              <Route path="/forgot-password" element={<ForgotPasswordForm />} />
 
-            {/* dashboard 
+              {/* dashboard 
             In this route you only can access after doing login or register
             */}
-            <Route
-              path="/dashboard"
-              element={
-                <Dashboard
-                  appState={appState}
-                  status={status}
-                  onStartChat={handleStartChat}
-                  onUnpinMatch={unpinMatch}
-                />
-              }
-            />
+              <Route
+                path="/dashboard"
+                element={
+                  <Dashboard
+                    appState={appState}
+                    status={status}
+                    onStartChat={handleStartChat}
+                    onUnpinMatch={unpinMatch}
+                  />
+                }
+              />
 
-            {/* Chat
+              {/* Chat
             In this route you only can access after doing login or register 
             */}
-            <Route
-              path="/chat"
-              element={
-                appState.currentMatch ? (
-                  <ChatInterface
-                    match={appState.currentMatch}
-                    onBack={handleBackToDashboard}
+              <Route
+                path="/chat"
+                element={
+                  appState.currentMatch ? (
+                    <ChatInterface
+                      match={appState.currentMatch}
+                      onBack={handleBackToDashboard}
+                    />
+                  ) : (
+                    <div className="p-6 text-center">
+                      <p className="text-gray-600">No active conversation</p>
+                    </div>
+                  )
+                }
+              />
+
+              {/* profile 
+            In this route you only can access after doing login or register
+            */}
+              <Route path="/profile" element={myUser ? <Profile /> : null} />
+
+              {/* Settings
+            In this route you only can access after doing login or register
+            */}
+              <Route
+                path="/settings"
+                element={
+                  <div className="p-6 pt-20 pb-24">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-6">
+                      Settings
+                    </h1>
+                    <div className="space-y-4">
+                      <button
+                        onClick={() => navigate("/onboarding-user")}
+                        className="w-full p-4 bg-white rounded-xl shadow-sm text-left hover:bg-gray-50 transition-all duration-200"
+                      >
+                        <h3 className="font-medium text-gray-900">
+                          Retake Compatibility Assessment
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Update your preferences and matching criteria
+                        </p>
+                      </button>
+                      <button className="w-full p-4 bg-white rounded-xl shadow-sm text-left hover:bg-gray-50 transition-all duration-200">
+                        <h3 className="font-medium text-gray-900">
+                          Notification Settings
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Manage how and when you receive notifications
+                        </p>
+                      </button>
+                      <button className="w-full p-4 bg-white rounded-xl shadow-sm text-left hover:bg-gray-50 transition-all duration-200">
+                        <h3 className="font-medium text-gray-900">
+                          Privacy & Safety
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Control your privacy and safety settings
+                        </p>
+                      </button>
+                      <button className="w-full p-4 bg-white rounded-xl shadow-sm text-left hover:bg-gray-50 transition-all duration-200">
+                        <h3 className="font-medium text-gray-900">
+                          Help & Support
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Get help and contact support
+                        </p>
+                      </button>
+                      <button className="w-full p-4 bg-red-50 border border-red-200 rounded-xl text-left hover:bg-red-100 transition-all duration-200">
+                        <h3 className="font-medium text-red-900">Sign Out</h3>
+                        <p className="text-sm text-red-600 mt-1">
+                          Sign out of your account
+                        </p>
+                      </button>
+                    </div>
+                  </div>
+                }
+              />
+
+              {/* In this routes you can access without doing login or register and then not you will rediected to previous page */}
+              <Route
+                path="/"
+                element={
+                  <Dashboard
+                    appState={appState}
+                    onStartChat={handleStartChat}
+                    onUnpinMatch={unpinMatch}
+                    status={status}
                   />
-                ) : (
-                  <div className="p-6 text-center">
-                    <p className="text-gray-600">No active conversation</p>
-                  </div>
-                )
-              }
-            />
+                }
+              />
 
-            {/* profile 
-            In this route you only can access after doing login or register
-            */}
-            <Route
-              path="/profile"
-              element={myUser ? <Profile user={myUser} /> : null}
-            />
+              <Route path="/testchat/:user1/:user2" element={<TestChat />} />
 
-            {/* Settings
-            In this route you only can access after doing login or register
-            */}
-            <Route
-              path="/settings"
-              element={
-                <div className="p-6 pt-20 pb-24">
-                  <h1 className="text-2xl font-bold text-gray-900 mb-6">
-                    Settings
-                  </h1>
-                  <div className="space-y-4">
-                    <button
-                      onClick={() => navigate("/onboarding-user")}
-                      className="w-full p-4 bg-white rounded-xl shadow-sm text-left hover:bg-gray-50 transition-all duration-200"
-                    >
-                      <h3 className="font-medium text-gray-900">
-                        Retake Compatibility Assessment
-                      </h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Update your preferences and matching criteria
-                      </p>
-                    </button>
-                    <button className="w-full p-4 bg-white rounded-xl shadow-sm text-left hover:bg-gray-50 transition-all duration-200">
-                      <h3 className="font-medium text-gray-900">
-                        Notification Settings
-                      </h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Manage how and when you receive notifications
-                      </p>
-                    </button>
-                    <button className="w-full p-4 bg-white rounded-xl shadow-sm text-left hover:bg-gray-50 transition-all duration-200">
-                      <h3 className="font-medium text-gray-900">
-                        Privacy & Safety
-                      </h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Control your privacy and safety settings
-                      </p>
-                    </button>
-                    <button className="w-full p-4 bg-white rounded-xl shadow-sm text-left hover:bg-gray-50 transition-all duration-200">
-                      <h3 className="font-medium text-gray-900">
-                        Help & Support
-                      </h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Get help and contact support
-                      </p>
-                    </button>
-                    <button className="w-full p-4 bg-red-50 border border-red-200 rounded-xl text-left hover:bg-red-100 transition-all duration-200">
-                      <h3 className="font-medium text-red-900">Sign Out</h3>
-                      <p className="text-sm text-red-600 mt-1">
-                        Sign out of your account
-                      </p>
-                    </button>
-                  </div>
-                </div>
-              }
-            />
+              <Route
+                path="/onboarding-user"
+                element={<Onboarding onComplete={handleOnboardingComplete} />}
+              />
+            </Routes>
+          </main>
 
-            {/* In this routes you can access without doing login or register and then not you will rediected to previous page */}
-            <Route
-              path="/"
-              element={
-                <Dashboard
-                  appState={appState}
-                  onStartChat={handleStartChat}
-                  onUnpinMatch={unpinMatch}
-                  status={status}
-                />
-              }
-            />
-
-            <Route path="/testchat/:user1/:user2" element={<TestChat />} />
-
-            <Route
-              path="/onboarding-user"
-              element={<Onboarding onComplete={handleOnboardingComplete} />}
-            />
-          </Routes>
-        </main>
-
-        {/* Mobile Bottom Navigation */}
-        <div className="lg:hidden">
-          <Navigation userState={appState.userState} />
+          {/* Mobile Bottom Navigation */}
+          <div className="lg:hidden">
+            <Navigation userState={appState.userState} />
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

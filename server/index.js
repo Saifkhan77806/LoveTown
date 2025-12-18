@@ -21,13 +21,22 @@ import onBoardRoutes from "./routes/onboardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import matchedRoutes from "./routes/matchedroutes.js";
 import { Message } from "./models/Message.js";
+import { clerkMiddleware, requireAuth } from "@clerk/express";
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(morgan("dev"));
+app.use(clerkMiddleware());
 
 dotenv.config();
+
+import { verifyToken } from "@clerk/clerk-sdk-node";
 
 const genAI = new GoogleGenerativeAI(process.env.AI_KEY);
 const model = genAI.getGenerativeModel({ model: "embedding-001" });
@@ -234,7 +243,7 @@ io.on("connection", (socket) => {
 
 // create users
 
-app.post("/create-user", async (req, res) => {
+app.post("/create-user", requireAuth, async (req, res) => {
   try {
     const isUser = await getUserByEmail(req.body.email);
 
@@ -252,71 +261,9 @@ app.post("/create-user", async (req, res) => {
   }
 });
 
-app.use("/api", onBoardRoutes);
-app.use("/user", userRoutes);
-app.use("/matched", matchedRoutes);
-
-// app.put("/onboard-user", async (req, res) => {
-//   const {
-//     email,
-//     age,
-//     bio,
-//     gender,
-//     photos,
-//     location,
-//     interests,
-//     values,
-//     personalityType,
-//     relationshipGoals,
-//     communicationStyle,
-//     mood,
-//   } = req.body;
-
-//   try {
-//     // const result = await model.embedContent({
-//     //   content: { parts: [{ text: mood }] },
-//     //   taskType: "RETRIEVAL_DOCUMENT",
-//     // });
-
-//     // const embedContent = result.embedding.values;
-
-//     // const bioResult = await model.embedContent({
-//     //   content: { parts: [{ text: mood }] },
-//     //   taskType: "RETRIEVAL_DOCUMENT",
-//     // });
-
-//     // const bioEmbedContent = bioResult.embedding.values;
-
-//     const user = await User.findOneAndUpdate(
-//       { email },
-//       {
-//         age,
-//         bio,
-//         gender,
-//         photos,
-//         location,
-//         interests,
-//         values,
-//         personalityType,
-//         relationshipGoals,
-//         communicationStyle,
-//         mood,
-//         moodembedding: [1, 2, 5, 2, 3],
-//         bioEmbedding: [2, 5, 4, 6, 3, 5, 56, 6, 5],
-//       },
-//       { new: true }
-//     );
-
-//     if (!user)
-//       return res
-//         .status(404)
-//         .json({ success: false, message: "User not found" });
-
-//     res.status(200).json({ success: true, data: user });
-//   } catch (err) {
-//     return res.status(400).json({ success: false, message: err.message });
-//   }
-// });
+app.use("/api", requireAuth, onBoardRoutes);
+app.use("/user", requireAuth, userRoutes);
+app.use("/matched", requireAuth, matchedRoutes);
 
 const cosineSimilarity = (a, b) => {
   const dot = a.reduce((sum, ai, i) => sum + ai * b[i], 0);
@@ -369,12 +316,6 @@ app.get("/api/jobs", (req, res) => {
   const jobs = getAllJobs();
   res.json({ success: true, jobs });
 });
-
-// app.get("/test", async (req, res) => {
-// const users = await getFilteredUsersByEmail("saifkhan042358@gmail.com");
-
-// res.status(200).json({ users });
-// });
 
 app.get("/match-user/:email", async (req, res) => {
   const email = req.params.email;
@@ -461,6 +402,38 @@ app.post("/update-match-status-chatting/:data", async (req, res) => {
     });
   } catch (err) {
     return res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+app.get("/", (req, res) => {
+  return res.json({
+    message: "this is me!",
+  });
+});
+
+app.get("/test", async (req, res) => {
+  console.log(req.auth);
+
+  try {
+    // Check if auth exists
+    if (!req.auth || !req.auth.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized - No valid session",
+      });
+    }
+
+    res.json({
+      clerkUserId: req.auth.userId,
+      success: true,
+      message: "user is authenticated",
+    });
+  } catch (error) {
+    console.error("Auth error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 });
 

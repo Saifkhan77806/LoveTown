@@ -1,5 +1,6 @@
 import { getFilteredUsersByEmail } from "../data/match.js";
 import { scheduleJob } from "../helper/cronManager.js";
+import { getFutureDate } from "../helper/date.js";
 import { Match } from "../models/Match.js";
 import { User } from "../models/User.js";
 
@@ -24,6 +25,7 @@ export const onBoardUser = async (req, res) => {
     let status = "onboarding";
     let time = 2;
     let matchedUserEmail;
+    let freezeTime;
 
     const isFrozen = userdata?._doc;
     console.log("frozen", isFrozen, userdata);
@@ -46,23 +48,25 @@ export const onBoardUser = async (req, res) => {
           ? matchedUser.user2
           : matchedUser.user1;
 
+      freezeTime = getFutureDate(1);
+
       await User.findOneAndUpdate(
         { email: matchedUserEmail },
         {
-          $set: { status: "breakup" },
+          $set: { status: "breakup", messages: [], freezeTime },
           $inc: { matchesCount: 1 },
         },
         { new: true }
       );
 
-      scheduleJob(user._id, 1, async () => {
-      await getFilteredUsersByEmail(matchedUserEmail);
-    });
+      scheduleJob(matchedUserEmail, 1, async () => {
+        await getFilteredUsersByEmail(matchedUserEmail);
+      });
 
       await User.findOneAndUpdate(
         { email: mydata.email },
         {
-          $set: { status: "frozen" },
+          $set: { status: "frozen", messages: [], freezeTime },
           $inc: { matchesCount: 1 },
         },
         { new: true }
@@ -70,6 +74,10 @@ export const onBoardUser = async (req, res) => {
 
       await Match.findOneAndDelete({
         $or: [{ user1: mydata.email }, { user2: mydata.email }],
+      });
+
+      scheduleJob(mydata.email, 1, async () => {
+        await getFilteredUsersByEmail(mydata.email);
       });
 
       return res.status(200).json({
@@ -86,6 +94,8 @@ export const onBoardUser = async (req, res) => {
       time = 24;
     }
 
+    freezeTime = getFutureDate(1);
+
     const user = await User.findOneAndUpdate(
       { email },
       {
@@ -101,6 +111,7 @@ export const onBoardUser = async (req, res) => {
         relationshipGoals,
         communicationStyle,
         mood,
+        freezeTime,
         moodembedding: [1, 2, 5, 2, 3],
         bioEmbedding: [2, 5, 4, 6, 3, 5, 56, 6, 5],
       },

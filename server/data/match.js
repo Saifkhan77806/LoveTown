@@ -1,3 +1,4 @@
+import { scheduleJob } from "../helper/cronManager.js";
 import { Match } from "../models/Match.js";
 import { User } from "../models/User.js";
 
@@ -58,7 +59,15 @@ export async function getFilteredUsersByEmail(email) {
     });
 
     if (users.length === 0) {
-      throw new Error("Match not found");
+      scheduleJob(email, 1, async () => {
+        console.log("again cron job is scheduled");
+        await getFilteredUsersByEmail(email);
+      });
+
+      return;
+
+      // TODO: sent email that currently match not found, it will execute function after a while
+      // throw new Error("Matching user not found");
     }
 
     const match = Math.floor(Math.random() * users.length);

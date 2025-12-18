@@ -4,4 +4,5 @@ const baseURL = import.meta.env.VITE_BASEURL;
 
 export const api = axios.create({
   baseURL,
+  
 });

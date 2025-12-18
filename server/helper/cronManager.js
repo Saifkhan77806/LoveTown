@@ -14,7 +14,6 @@ export function scheduleJob(jobId, hoursFromNow, callback) {
   });
 
   jobs.set(jobId, task);
-  return true;
 }
 
 export function cancelJob(jobId) {

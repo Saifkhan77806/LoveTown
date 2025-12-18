@@ -63,12 +63,12 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div className="flex items-center gap-3">
             {/* profile image */}
             <img
-              src="https://images.pexels.com/photos/1239288/pexels-photo-1239288.jpeg"
+              src={user?.imageUrl}
               alt="Profile"
               className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
             />
             <div>
-              <h3 className="font-medium text-gray-900">saif khan</h3>
+              <h3 className="font-medium text-gray-900">{user?.username}</h3>
               <h2 className='font-medium text-gray-900'>{email}</h2>
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${userState === 'matched' ? 'bg-primary-500' :

@@ -126,6 +126,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ onBack }) => {
           >
             ←
           </button>
+          <div className="size-9 overflow-hidden rounded-full"><img src={matchedUser?.photos} alt="" /></div>
           <div>
             <h2 className="font-semibold text-gray-900">
               {matchedUser?.name || ""}

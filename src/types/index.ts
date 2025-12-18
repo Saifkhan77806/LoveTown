@@ -9,6 +9,7 @@ export interface userType {
   createdAt: Date;
   updatedAt: Date;
   age: number;
+  freezeTime: Date;
   bio: string;
   communicationStyle: string;
   gender: string;
